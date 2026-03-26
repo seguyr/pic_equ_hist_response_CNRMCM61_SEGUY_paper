@@ -29,10 +29,9 @@ DIR_PIC = DATA_ROOT / "pic_ens/pic"
 DIR_AMOC = Path("/cnrm/ioga/Users/seguy/hist_ensbl/pic_global")
 
 
-
-def load_area_ocean(area_dir: Path) -> xr.DataArray:
-    """Load ocean grid-cell area."""
-    ds = xr.open_mfdataset(str(area_dir / "*.nc"))
+def load_area_ocean():
+    """Load ocean grid-cell area from repository metadata."""
+    ds = xr.open_dataset(AREACELLO_FILE)
     return ds["areacello"]
 
 
