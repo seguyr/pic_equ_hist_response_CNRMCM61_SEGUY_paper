@@ -77,16 +77,11 @@ def main():
 
     ohc_pic = load_pic_ohc(
         pic_dir=DIR_PIC,
-        cp=CP,
-        rho=RHO,
-        area_tot=AREA_TOT,
         scale=ECHELLE_OHC,
     )
 
     amoc_pic = load_pic_amoc(
         amoc_dir=DIR_AMOC,
-        rho=RHO,
-        scale=ECHELLE_AMOC,
     )
 
     ohc_hist_1000 = load_integrated_ohc(
