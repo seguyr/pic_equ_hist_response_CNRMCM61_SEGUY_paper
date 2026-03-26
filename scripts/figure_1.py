@@ -50,7 +50,6 @@ from functions.utils import (
 # Physical constants
 # -----------------------------------------------------------------------------
 ECHELLE_OHC = 1e21  # ZJ
-ECHELLE_AMOC = 1e6  # Sv
 
 # -----------------------------------------------------------------------------
 # Time axes
@@ -75,14 +74,9 @@ def main():
     # -------------------------------------------------------------------------
     area_oce = load_area_ocean()
 
-    ohc_pic = load_pic_ohc(
-        pic_dir=DIR_PIC,
-        scale=ECHELLE_OHC,
-    )
-
-    amoc_pic = load_pic_amoc(
-        amoc_dir=DIR_AMOC,
-    )
+    ohc_pic = load_pic_ohc(scale=ECHELLE_OHC)
+    
+    amoc_pic = load_pic_amoc()
 
     ohc_hist_1000 = load_integrated_ohc(
         DIR_HIST_TOT / "2D_ohc_hist_tot_0_btm.nc",
