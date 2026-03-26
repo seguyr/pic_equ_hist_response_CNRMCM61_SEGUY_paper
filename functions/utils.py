@@ -18,7 +18,7 @@ def load_area_ocean(area_dir: Path) -> xr.DataArray:
 
 def load_pic_ohc(pic_dir, cp, rho, area_tot, scale):
     """Load piControl global OHC."""
-    ds = xr.open_mfdataset(str(pic_dir / "heatc1D*.nc"))
+    ds = xr.open_mfdataset(str(pic_dir / "heatc1D*.nc"), use_cftime=True)
 
     ohc = (
         ds.thetao.isel(lon=0, lat=0)
@@ -31,7 +31,7 @@ def load_pic_ohc(pic_dir, cp, rho, area_tot, scale):
 
 def load_pic_amoc(amoc_dir, rho, scale):
     """Load piControl AMOC."""
-    ds = xr.open_mfdataset(str(amoc_dir / "amoc_pic_gb_3000y*.nc"))
+    ds = xr.open_mfdataset(str(amoc_dir / "amoc_pic_gb_3000y*.nc"), use_cftime=True)
 
     amoc = ds.msftyz / (rho * scale)
 
