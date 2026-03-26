@@ -16,6 +16,20 @@ HIST_START_YEARS_FILE = METADATA_DIR / "hist_start_years.nc"
 AREACELLO_FILE = METADATA_DIR / "areacello.nc"
 MASK_FILE = METADATA_DIR / "mask.nc"
 
+DATA_ROOT = Path("/cnrm/ioga/Users/seguyr")
+
+DIR_HIST_TOT = DATA_ROOT / "hist_ens/hist_tot"
+DIR_HIST_3000 = DATA_ROOT / "hist_ens/hist_3000"
+
+DIR_PIC_TOT = DATA_ROOT / "pic_ens/pic_tot"
+DIR_PIC_3000 = DATA_ROOT / "pic_ens/pic_3000"
+
+DIR_PIC = DATA_ROOT / "pic_ens/pic"
+
+DIR_AMOC = Path("/cnrm/ioga/Users/seguy/hist_ensbl/pic_global")
+
+
+
 def load_area_ocean(area_dir: Path) -> xr.DataArray:
     """Load ocean grid-cell area."""
     ds = xr.open_mfdataset(str(area_dir / "*.nc"))
