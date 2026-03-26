@@ -19,6 +19,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
+
 # -----------------------------------------------------------------------------
 # Make the project root importable
 # -----------------------------------------------------------------------------
@@ -44,9 +45,7 @@ DIR_HIST_3000 = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/hist+3000"
 DIR_PIC = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/pic")
 DIR_AMOC = Path("/cnrm/ioga/Users/seguy/hist_ensbl/pic_global")
 DIR_AREA_OCE = Path("/home/seguyr/Documents/TT/areacello")
-FILE_BRANCHING_YEARS = Path(
-    "/home/seguyr/Documents/TT/hist_ensbl/fig_papier/hist_start_years.nc"
-)
+
 
 OUTDIR = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier")
 OUTFILE = OUTDIR / "papier_fig1_ohc_eq_branching_hist.png"
@@ -107,8 +106,7 @@ def main():
         area_oce,
     )
 
-    
-    starty_tot, starty_3000 = load_branching_years(FILE_BRANCHING_YEARS)
+    starty_tot, starty_3000 = load_branching_years()
 
     # -------------------------------------------------------------------------
     # Figure setup
