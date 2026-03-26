@@ -40,7 +40,7 @@ def load_pic_ohc(pic_dir, scale):
     ds = xr.open_mfdataset(str(pic_dir / "heatc1D*.nc"), use_cftime=True)
 
     ohc = (
-        ds.thetao.isel(lon=0, lat=0) / scale
+        ds.thetao / scale
     )
 
     return ohc.assign_coords(time=np.arange(3000))
