@@ -38,8 +38,8 @@ BASE_DIR="/cnrm/ioga/Users/seguy/hist_ens/hist_${MEMBER}"
 TMP_DIR="${BASE_DIR}/tmp"
 
 # Physical constants
-CP=3992
-RHO=1025
+CP=3992 # J/(kg*K)
+RHO=1026 # kg/m³
 CPRHO=$(awk "BEGIN {print ${CP}*${RHO}}")
 
 mkdir -p "${TMP_DIR}"
