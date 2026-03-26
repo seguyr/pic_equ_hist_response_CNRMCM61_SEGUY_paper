@@ -26,8 +26,6 @@ DIR_PIC_3000 = DATA_ROOT / "pic_ens/pic_3000"
 
 DIR_PIC = DATA_ROOT / "pic_ens/pic"
 
-DIR_AMOC = Path("/cnrm/ioga/Users/seguy/hist_ensbl/pic_global")
-
 
 def load_area_ocean():
     """Load ocean grid-cell area from repository metadata."""
@@ -35,24 +33,23 @@ def load_area_ocean():
     return ds["areacello"]
 
 
-def load_pic_ohc(pic_dir, scale):
-    """Load piControl global OHC."""
-    ds = xr.open_mfdataset(str(pic_dir / "heatc1D*.nc"), use_cftime=True)
+def load_pic_ohc(scale):
+    """Load full piControl global OHC time series (scaled to ZJ)."""
+    ds = xr.open_dataset(DIR_PIC / "ohc_1D_picontrol.nc")
 
-    ohc = (
-        ds.thetao / scale
-    )
+    varname = list(ds.data_vars)[0]
+    ohc = ds[varname] / scale
 
-    return ohc.assign_coords(time=np.arange(3000))
+    return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
 
 
-def load_pic_amoc(amoc_dir, rho, scale):
-    """Load piControl AMOC."""
-    ds = xr.open_mfdataset(str(amoc_dir / "amoc_pic_gb_3000y*.nc"), use_cftime=True)
-    
-    amoc = ds.amoc
+def load_pic_amoc():
+    """Load full piControl AMOC time series (Sv)."""
+    ds = xr.open_dataset(DIR_PIC / "amoc_picontrol.nc")
 
-    return amoc.assign_coords(year=np.arange(3001))
+    amoc = ds["amoc"]
+
+    return amoc.assign_coords(year=np.arange(amoc.sizes["year"]))
 
 
 def load_integrated_ohc(filepath, area_oce):
