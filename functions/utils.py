@@ -35,14 +35,12 @@ def load_area_ocean():
     return ds["areacello"]
 
 
-def load_pic_ohc(pic_dir, cp, rho, area_tot, scale):
+def load_pic_ohc(pic_dir, scale):
     """Load piControl global OHC."""
     ds = xr.open_mfdataset(str(pic_dir / "heatc1D*.nc"), use_cftime=True)
 
     ohc = (
-        ds.thetao.isel(lon=0, lat=0)
-        * cp * rho * area_tot
-        / scale
+        ds.thetao.isel(lon=0, lat=0) / scale
     )
 
     return ohc.assign_coords(time=np.arange(3000))
@@ -51,8 +49,8 @@ def load_pic_ohc(pic_dir, cp, rho, area_tot, scale):
 def load_pic_amoc(amoc_dir, rho, scale):
     """Load piControl AMOC."""
     ds = xr.open_mfdataset(str(amoc_dir / "amoc_pic_gb_3000y*.nc"), use_cftime=True)
-
-    amoc = ds.msftyz / (rho * scale)
+    
+    amoc = ds.amoc
 
     return amoc.assign_coords(year=np.arange(3001))
 
