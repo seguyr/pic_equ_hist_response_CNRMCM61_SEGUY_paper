@@ -51,9 +51,10 @@ def load_integrated_ohc(filepath, area_oce):
     return (ds * area_oce).sum(dim=("x", "y")).__xarray_dataarray_variable__
 
 
-def load_branching_years(filepath):
+def load_branching_years():
     """Return branching years for both ensembles."""
-    hist_starty = xr.open_dataset(filepath)["year"]
+
+    hist_starty = xr.open_dataset(HIST_START_YEARS_FILE)["year"]
 
     starty_tot = hist_starty[0:29].values.tolist()
     starty_3000 = hist_starty[29:39].values.tolist()
