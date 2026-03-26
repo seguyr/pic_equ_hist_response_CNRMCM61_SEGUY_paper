@@ -12,7 +12,6 @@ This script plots:
 
 from pathlib import Path
 import sys
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
@@ -25,30 +24,27 @@ from matplotlib.patches import Patch
 # -----------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(PROJECT_ROOT))
-os.makedirs("figures", exist_ok=True)
 
-from functions.utils import (  # noqa: E402
+# -----------------------------------------------------------------------------
+# Output directory for figures
+# -----------------------------------------------------------------------------
+FIG_DIR = PROJECT_ROOT / "figures"
+FIG_DIR.mkdir(exist_ok=True)
+
+# -----------------------------------------------------------------------------
+# Imports from project utilities
+# -----------------------------------------------------------------------------
+from functions.utils import (
+    DIR_PIC,
+    DIR_AMOC,
+    DIR_HIST_TOT,
+    DIR_HIST_3000,
     load_area_ocean,
     load_pic_ohc,
     load_pic_amoc,
     load_integrated_ohc,
     load_branching_years,
 )
-
-# -----------------------------------------------------------------------------
-# Paths
-# -----------------------------------------------------------------------------
-DIR_PIC_TOT = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/pic_tot")
-DIR_PIC_3000 = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/pic+3000")
-DIR_HIST_TOT = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/hist_tot")
-DIR_HIST_3000 = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/hist+3000")
-DIR_PIC = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier/pic")
-DIR_AMOC = Path("/cnrm/ioga/Users/seguy/hist_ensbl/pic_global")
-DIR_AREA_OCE = Path("/home/seguyr/Documents/TT/areacello")
-
-
-OUTDIR = Path("/home/seguyr/Documents/TT/hist_ensbl/fig_papier")
-OUTFILE = OUTDIR / "papier_fig1_ohc_eq_branching_hist.png"
 
 # -----------------------------------------------------------------------------
 # Physical constants
@@ -80,7 +76,7 @@ def main():
     # -------------------------------------------------------------------------
     # Load data
     # -------------------------------------------------------------------------
-    area_oce = load_area_ocean(DIR_AREA_OCE)
+    area_oce = load_area_ocean()
 
     ohc_pic = load_pic_ohc(
         pic_dir=DIR_PIC,
@@ -271,7 +267,7 @@ def main():
     plt.tight_layout()
 
     # Save figure
-    plt.savefig("figures/figure1.pdf", bbox_inches="tight")
+    plt.savefig(FIG_DIR / "figure1.pdf", bbox_inches="tight")
     plt.show()
 
 
