@@ -12,7 +12,7 @@ This script plots:
 
 from pathlib import Path
 import sys
-
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
@@ -24,6 +24,7 @@ from matplotlib.patches import Patch
 # -----------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(PROJECT_ROOT))
+os.makedirs("figures", exist_ok=True)
 
 from functions.utils import (  # noqa: E402
     load_area_ocean,
@@ -272,9 +273,7 @@ def main():
     plt.tight_layout()
 
     # Save figure
-    # OUTDIR.mkdir(parents=True, exist_ok=True)
-    # plt.savefig(OUTFILE, dpi=300, bbox_inches="tight")
-
+    plt.savefig("figures/figure1.pdf", bbox_inches="tight")
     plt.show()
 
 
