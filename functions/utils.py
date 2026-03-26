@@ -55,6 +55,7 @@ def load_integrated_ohc(dataset_type, area_oce):
         filepath = DIR_HIST_3000 / "ohc_2D_hist_3000.nc"
     ds = xr.open_dataset(filepath)
     varname = list(ds.data_vars)[0]
+    area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
     return (ds[varname] * area_oce).sum(dim=("x", "y"))
 
 
