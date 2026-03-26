@@ -35,11 +35,6 @@ FIG_DIR.mkdir(exist_ok=True)
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    DIR_PIC,
-    DIR_AMOC,
-    DIR_HIST_TOT,
-    DIR_HIST_3000,
-    load_area_ocean,
     load_pic_ohc,
     load_pic_amoc,
     load_integrated_ohc,
@@ -54,7 +49,6 @@ ECHELLE_OHC = 1e21  # ZJ
 # -----------------------------------------------------------------------------
 # Time axes
 # -----------------------------------------------------------------------------
-TIME_PIC = np.arange(3000)   # 0 to 2999
 TIME_HIST = np.arange(165)   # 0 to 164
 
 # -----------------------------------------------------------------------------
