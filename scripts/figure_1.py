@@ -72,21 +72,14 @@ def main():
     # -------------------------------------------------------------------------
     # Load data
     # -------------------------------------------------------------------------
-    area_oce = load_area_ocean()
 
     ohc_pic = load_pic_ohc(scale=ECHELLE_OHC)
     
     amoc_pic = load_pic_amoc()
 
-    ohc_hist_1000 = load_integrated_ohc(
-        DIR_HIST_TOT / "2D_ohc_hist_tot_0_btm.nc",
-        area_oce,
-    )
+    ohc_hist_1000 = load_integrated_ohc("hist_tot")
 
-    ohc_hist_3000 = load_integrated_ohc(
-        DIR_HIST_3000 / "2D_ohc_hist_3000_0_btm.nc",
-        area_oce,
-    )
+    ohc_hist_3000 = load_integrated_ohc("hist_3000")
 
     starty_tot, starty_3000 = load_branching_years()
 
