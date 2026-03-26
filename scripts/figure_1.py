@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 26 09:13:41 2026
-
-@author: seguyr
-"""
 """
 Figure 1: Experiment protocol
 =============================
