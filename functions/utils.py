@@ -4,11 +4,17 @@ Utility functions for loading and processing climate diagnostics
 used in the manuscript figures.
 """
 
-
 from pathlib import Path
 import numpy as np
 import xarray as xr
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+METADATA_DIR = REPO_ROOT / "data" / "metadata"
+
+HIST_START_YEARS_FILE = METADATA_DIR / "hist_start_years.nc"
+AREACELLO_FILE = METADATA_DIR / "areacello.nc"
+MASK_FILE = METADATA_DIR / "mask.nc"
 
 def load_area_ocean(area_dir: Path) -> xr.DataArray:
     """Load ocean grid-cell area."""
@@ -45,9 +51,10 @@ def load_integrated_ohc(filepath, area_oce):
     return (ds * area_oce).sum(dim=("x", "y")).__xarray_dataarray_variable__
 
 
-def load_branching_years(filepath):
+def load_branching_years():
     """Return branching years for both ensembles."""
-    hist_starty = xr.open_dataset(filepath)["year"]
+
+    hist_starty = xr.open_dataset(HIST_START_YEARS_FILE)["year"]
 
     starty_tot = hist_starty[0:29].values.tolist()
     starty_3000 = hist_starty[29:39].values.tolist()
