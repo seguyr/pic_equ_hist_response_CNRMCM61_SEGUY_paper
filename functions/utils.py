@@ -32,6 +32,18 @@ QT_INF = 0.05
 QT_SUP = 0.95
 seed = 0
 
+COLORS = {
+    "orange_dark": "#d95f02",
+    "orange_light": "#fdd0a2",
+    "teal_dark": "#1b9e77",
+    "teal_light": "#a6dba0",
+    "red_dark": "#b2182b",
+    "red_light": "#f4a6b3",
+    "blue_dark": "#2166ac",
+    "blue_light": "#92c5de",
+}
+
+
 
 def load_area_ocean():
     """Load ocean grid-cell area from repository metadata."""
