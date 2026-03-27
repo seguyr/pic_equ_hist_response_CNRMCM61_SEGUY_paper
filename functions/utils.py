@@ -208,3 +208,19 @@ def boot_diff(arr1: xr.DataArray, arr2: xr.DataArray):
     """Run bootstrap_2 and return a formatted xarray.DataArray."""
     result = bootstrap_2(arr1, arr2)
     return to_bootstrap_xarray(result, arr1)
+
+def get_stats(arr: xr.DataArray):
+    lower = arr.sel(stats="lower")
+    mean = arr.sel(stats="mean")
+    upper = arr.sel(stats="upper")
+    return lower, mean, upper
+
+
+def get_ci(arr: xr.DataArray):
+    lower, mean, upper = get_stats(arr)
+    return mean, lower, upper
+
+
+def get_scalar_stats(arr: xr.DataArray):
+    lower, mean, upper = get_stats(arr)
+    return float(lower.values), float(mean.values), float(upper.values)
