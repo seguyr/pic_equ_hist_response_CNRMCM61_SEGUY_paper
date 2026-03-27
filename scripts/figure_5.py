@@ -44,24 +44,29 @@ from functions.utils import (
 # -----------------------------------------------------------------------------
 # Physical constants
 # -----------------------------------------------------------------------------
-ECHELLE_OHC = 1e21  # ZJ
+ECHELLE_OHC = 1e21  # convert J to ZJ
+UNIT = "ZJ"
+
+REF_START = 1850
+REF_END = 1899
+
+PERIOD_GAIN_START = 1995
+PERIOD_GAIN_END = 2014
+
+TIME_HIST = np.arange(165) + REF_START
 
 # -----------------------------------------------------------------------------
 # Calcul
 # -----------------------------------------------------------------------------
-
-# Load 2D OHC ensembles
 
 hist_1000 = load_integrated_ohc("hist_tot") / ECHELLE_OHC
 hist_3000 = load_integrated_ohc("hist_3000") / ECHELLE_OHC
 pic_1000 = load_integrated_ohc("pic_tot") / ECHELLE_OHC
 pic_3000 = load_integrated_ohc("pic_3000") / ECHELLE_OHC
 
-OHC_2D_hist_tot, OHC_2D_hist_3000, OHC_2D_pic_tot, OHC_2D_pic_3000 = load_ohc_2d_ensembles()
-
 # Dedrift by time matching
-OHC_dd_1000 = time_matching(OHC_2D_hist_tot, OHC_2D_pic_tot)
-OHC_dd_3000 = time_matching(OHC_2D_hist_3000, OHC_2D_pic_3000)
+OHC_dd_1000 = time_matching(hist_1000, pic_1000)
+OHC_dd_3000 = time_matching(hist_3000, pic_3000)
 
 # Anomalies relative to first 50 years
 OHC_dd_1000 = anomalies(OHC_dd_1000)
@@ -89,20 +94,6 @@ hist_3000_low, hist_3000_mean, hist_3000_up = get_stats(hist_3000)
 diff_low, diff_mean, diff_up = get_stats(diff_hist_cor)
 rm_diff_low, rm_diff_mean, rm_diff_up = get_scalar_stats(m_diff_hist_cor)
 
-
-# -----------------------------------------------------------------------------
-# Figure parameters
-# -----------------------------------------------------------------------------
-ECHELLE_OHC = 1e21  # convert J to ZJ
-UNIT = "ZJ"
-
-REF_START = 1850
-REF_END = 1899
-
-PERIOD_GAIN_START = 1995
-PERIOD_GAIN_END = 2014
-
-TIME_HIST = np.arange(165) + REF_START
 
 # -----------------------------------------------------------------------------
 # Colors
