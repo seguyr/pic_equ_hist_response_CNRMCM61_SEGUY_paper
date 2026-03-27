@@ -51,6 +51,12 @@ ECHELLE_OHC = 1e21  # ZJ
 # -----------------------------------------------------------------------------
 
 # Load 2D OHC ensembles
+
+hist_1000 = load_integrated_ohc("hist_tot") / ECHELLE_OHC
+hist_3000 = load_integrated_ohc("hist_3000") / ECHELLE_OHC
+pic_1000 = load_integrated_ohc("pic_tot") / ECHELLE_OHC
+pic_3000 = load_integrated_ohc("pic_3000") / ECHELLE_OHC
+
 OHC_2D_hist_tot, OHC_2D_hist_3000, OHC_2D_pic_tot, OHC_2D_pic_3000 = load_ohc_2d_ensembles()
 
 # Dedrift by time matching
