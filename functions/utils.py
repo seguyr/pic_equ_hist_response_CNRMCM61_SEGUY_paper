@@ -27,6 +27,11 @@ DIR_PIC_3000 = DATA_ROOT / "pic_ens/pic_3000"
 DIR_PIC = DATA_ROOT / "pic_ens/pic"
 
 STATS_COORD = ["lower", "mean", "upper", "sigma", "p_value"]
+N_BOOT = 1000
+QT_INF = 0.05
+QT_SUP = 0.95
+seed = 0
+
 
 def load_area_ocean():
     """Load ocean grid-cell area from repository metadata."""
@@ -99,22 +104,15 @@ def gain(arr: xr.DataArray, gain_slice=slice(145, 165)) -> xr.DataArray:
 # Bootstrap functions
 # ============================================================
 
-def bootstrap(arr, n_boot=1000, qt_inf=0.05, qt_sup=0.95, seed=0):
+def bootstrap(arr):
     """
     Bootstrap confidence intervals across the ensemble dimension.
-
+    
     Parameters
     ----------
     arr : xr.DataArray
         Input array with an 'ensemble' dimension.
         Can also contain additional dimensions such as time, x, y.
-    n_boot : int
-        Number of bootstrap resamples.
-    qt_inf, qt_sup : float
-        Lower and upper quantiles.
-    seed : int
-        Random seed.
-
     Returns
     -------
     xr.DataArray
@@ -131,15 +129,15 @@ def bootstrap(arr, n_boot=1000, qt_inf=0.05, qt_sup=0.95, seed=0):
     ens_values = arr.ensemble.values
     sampled_ens = rng.choice(
         ens_values,
-        size=(n_boot, n_ens),
+        size=(N_BOOT, n_ens),
         replace=True,
     )
     sampled_da = xr.DataArray(sampled_ens, dims=("boot", "ensemble"))
     resampled = arr.sel(ensemble=sampled_da)
     boot_means = resampled.mean(dim="ensemble")
     boot_means = boot_means.chunk(dict(boot=-1))
-    q_inf = boot_means.quantile(qt_inf, dim="boot")
-    q_sup = boot_means.quantile(qt_sup, dim="boot")
+    q_inf = boot_means.quantile(QT_INF, dim="boot")
+    q_sup = boot_means.quantile(QT_SUP, dim="boot")
     mean = boot_means.mean(dim="boot")
     sigma = boot_means.std(dim="boot")
     p_left = (boot_means <= 0).mean(dim="boot")
@@ -151,7 +149,7 @@ def bootstrap(arr, n_boot=1000, qt_inf=0.05, qt_sup=0.95, seed=0):
     )
 
 
-def bootstrap_2(arr1, arr2, n_boot=1000, qt_inf=0.025, qt_sup=0.975, seed=0):
+def bootstrap_2(arr1, arr2):
     """
     Bootstrap confidence intervals for the difference between two ensembles:
     mean(arr2) - mean(arr1)
@@ -160,13 +158,6 @@ def bootstrap_2(arr1, arr2, n_boot=1000, qt_inf=0.025, qt_sup=0.975, seed=0):
     ----------
     arr1, arr2 : xr.DataArray
         Input arrays with an 'ensemble' dimension.
-    n_boot : int
-        Number of bootstrap resamples.
-    qt_inf, qt_sup : float
-        Lower and upper quantiles.
-    seed : int
-        Random seed.
-
     Returns
     -------
     xr.DataArray
@@ -180,15 +171,15 @@ def bootstrap_2(arr1, arr2, n_boot=1000, qt_inf=0.025, qt_sup=0.975, seed=0):
     ens_values1 = arr1.ensemble.values
     n_ens2 = arr2.sizes["ensemble"]
     ens_values2 = arr2.ensemble.values
-    sampled_ens_1 = rng.choice(ens_values1, size=(n_boot, n_ens1), replace=True)
-    sampled_ens_2 = rng.choice(ens_values2, size=(n_boot, n_ens2), replace=True)
+    sampled_ens_1 = rng.choice(ens_values1, size=(N_BOOT, n_ens1), replace=True)
+    sampled_ens_2 = rng.choice(ens_values2, size=(N_BOOT, n_ens2), replace=True)
     sampled_da_1 = xr.DataArray(sampled_ens_1, dims=("boot", "ensemble"))
     sampled_da_2 = xr.DataArray(sampled_ens_2, dims=("boot", "ensemble"))
     resampled_1 = arr1.sel(ensemble=sampled_da_1)
     resampled_2 = arr2.sel(ensemble=sampled_da_2)
     boot_means = resampled_2.mean(dim="ensemble") - resampled_1.mean(dim="ensemble")
-    q_inf = boot_means.quantile(qt_inf, dim="boot")
-    q_sup = boot_means.quantile(qt_sup, dim="boot")
+    q_inf = boot_means.quantile(QT_INF, dim="boot")
+    q_sup = boot_means.quantile(QT_SUP, dim="boot")
     mean = boot_means.mean(dim="boot")
     sigma = boot_means.std(dim="boot")
     p_left = (boot_means <= 0).mean(dim="boot")
@@ -208,13 +199,12 @@ def to_bootstrap_xarray(result, template: xr.DataArray) -> xr.DataArray:
         coords={"stats": STATS_COORD, **out_coords},
     )
 
-def boot(arr: xr.DataArray, n_boot=1000, qt_inf=0.025, qt_sup=0.975, seed=0):
+def boot(arr: xr.DataArray):
     """Run bootstrap and return a formatted xarray.DataArray."""
-    result = bootstrap(arr, n_boot=n_boot, qt_inf=qt_inf, qt_sup=qt_sup, seed=seed)
+    result = bootstrap(arr)
     return to_bootstrap_xarray(result, arr)
 
-
-def boot_diff(arr1: xr.DataArray, arr2: xr.DataArray, n_boot=1000, qt_inf=0.025, qt_sup=0.975, seed=0):
+def boot_diff(arr1: xr.DataArray, arr2: xr.DataArray):
     """Run bootstrap_2 and return a formatted xarray.DataArray."""
-    result = bootstrap_2(arr1, arr2, n_boot=n_boot, qt_inf=qt_inf, qt_sup=qt_sup, seed=seed)
+    result = bootstrap_2(arr1, arr2)
     return to_bootstrap_xarray(result, arr1)
