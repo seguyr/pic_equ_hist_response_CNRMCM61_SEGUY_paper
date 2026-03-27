@@ -54,11 +54,15 @@ def load_pic_amoc():
     return amoc.assign_coords(year=np.arange(amoc.sizes["year"]))
 
 
-def load_integrated_ohc(dataset_type, area_oce):
+def load_integrated_ohc(dataset_type):
     if dataset_type == "hist_tot":
         filepath = DIR_HIST_TOT / "ohc_2D_hist_tot.nc"
     elif dataset_type == "hist_3000":
         filepath = DIR_HIST_3000 / "ohc_2D_hist_3000.nc"
+    elif dataset_type == "pic_tot":
+        filepath = DIR_PIC_TOT / "ohc_2D_pic_tot.nc"
+    elif dataset_type == "pic_3000":
+        filepath = DIR_PIC_3000 / "ohc_2D_pic_3000.nc"
     ds = xr.open_dataset(filepath)
     varname = list(ds.data_vars)[0]
     area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
