@@ -85,143 +85,263 @@ rm_diff_low, rm_diff_mean, rm_diff_up = get_scalar_stats(m_diff_hist_cor)
 
 
 # -----------------------------------------------------------------------------
-# Tracé
+# Figure parameters
 # -----------------------------------------------------------------------------
+ECHELLE_OHC = 1e21  # convert J to ZJ
+UNIT = "ZJ"
+
+REF_START = 1850
+REF_END = 1899
+
+PERIOD_GAIN_START = 1995
+PERIOD_GAIN_END = 2014
+
+TIME_HIST = np.arange(165) + REF_START
+
+# -----------------------------------------------------------------------------
+# Colors
+# -----------------------------------------------------------------------------
+colors = {
+    "orange foncé": "#d95f02",
+    "orange clair": "#fdd0a2",
+    "teal foncé": "#1b9e77",
+    "teal clair": "#a6dba0",
+    "rouge foncé": "#b2182b",
+    "rouge clair": "#f4a6b3",
+    "bleu foncé": "#2166ac",
+    "blue clair": "#92c5de",
+}
 
 
-y = y_gb
-x = x_gb + 0.3
+# -----------------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------------
+def integrate_global_ohc(arr, area_oce, scale=1.0):
+    """
+    Convert a 2D OHC field (J m^-2) into a global OHC time series (scaled).
 
-fig, axes = plt.subplots(2, 1, figsize=(15, 15), sharex=True)
-ax1, ax2 = axes
+    Parameters
+    ----------
+    arr : xr.DataArray
+        Input array with dimensions including x and y.
+    area_oce : xr.DataArray
+        Ocean cell area (m²).
+    scale : float
+        Scaling factor applied after integration.
 
-bar_colors = [
-    colors["orange foncé"],
-    colors["teal foncé"],
-    colors["rouge foncé"],
-    colors["bleu foncé"],
-    colors["rouge clair"],
-]
-bar_labels = [
-    "Hist_dd+1000",
-    "Hist_dd+3000",
-    "Pic+1000",
-    "PiC+3000",
-    "Hist_dd+3000 - Hist_dd+1000",
-]
-panel_labels = ["a)", "b)"]
+    Returns
+    -------
+    xr.DataArray
+        Integrated global OHC time series.
+    """
+    spatial_dims = [d for d in arr.dims if d not in {"ensemble", "time", "stats"}]
+    return (arr * area_oce).sum(dim=spatial_dims) / scale
 
-# ============================================================
-# SUBPLOT 1
-# ============================================================
-time = pic_1000_mean.time + ref_start
 
-ax1.plot(time, pic_1000_mean.values, color=colors["rouge foncé"])
-ax1.fill_between(
-    time,
-    pic_1000_low.values,
-    pic_1000_up.values,
-    color=colors["rouge clair"],
-    alpha=0.8,
-)
+def plot_ci(ax, time, arr, line_color, fill_color, alpha=0.8, lw=2.5):
+    """
+    Plot bootstrap mean and confidence interval from a DataArray with
+    a 'stats' dimension.
+    """
+    lower, mean, upper = get_stats(arr)
 
-ax1.plot(time, pic_3000_mean.values, color=colors["bleu foncé"])
-ax1.fill_between(
-    time,
-    pic_3000_low.values,
-    pic_3000_up.values,
-    color=colors["blue clair"],
-    alpha=0.8,
-)
+    ax.plot(time, mean.values, color=line_color, linewidth=lw)
+    ax.fill_between(
+        time,
+        lower.values,
+        upper.values,
+        color=fill_color,
+        alpha=alpha,
+    )
 
-ax1.plot(time, hist_1000_mean.values, color=colors["orange foncé"])
-ax1.fill_between(
-    time,
-    hist_1000_low.values,
-    hist_1000_up.values,
-    color=colors["orange clair"],
-    alpha=0.8,
-)
 
-ax1.plot(time, hist_3000_mean.values, color=colors["teal foncé"])
-ax1.fill_between(
-    time,
-    hist_3000_low.values,
-    hist_3000_up.values,
-    color=colors["teal clair"],
-    alpha=0.8,
-)
+def main():
+    """Generate Figure 5."""
 
-ax1.set_ylabel(f"OHC / {ref_start}-{ref_end} ({unit})", fontsize=20)
-ax1.set_title("CNRM-CM6.1 working ensembles", fontsize=25, fontweight="bold")
-ax1.tick_params(axis="both", labelsize=20)
-ax1.axvspan(ref_start, ref_end, color="grey", alpha=0.2)
-ax1.grid()
+    # -------------------------------------------------------------------------
+    # Load data
+    # -------------------------------------------------------------------------
+    area_oce = load_area_ocean()
 
-ax1.text(
-    -0.08, 1.02, panel_labels[0],
-    transform=ax1.transAxes,
-    ha="right", va="bottom",
-    fontsize=22,
-    fontweight="bold",
-    clip_on=False,
-)
+    (
+        OHC_2D_hist_tot,
+        OHC_2D_hist_3000,
+        OHC_2D_pic_tot,
+        OHC_2D_pic_3000,
+    ) = load_ohc_2d_ensembles()
 
-# ============================================================
-# SUBPLOT 2
-# ============================================================
-time = diff_mean.time + ref_start
+    # -------------------------------------------------------------------------
+    # Global OHC time series for raw ensembles
+    # -------------------------------------------------------------------------
+    pic_1000 = integrate_global_ohc(OHC_2D_pic_tot, area_oce, scale=ECHELLE_OHC)
+    pic_3000 = integrate_global_ohc(OHC_2D_pic_3000, area_oce, scale=ECHELLE_OHC)
 
-ax2.plot(time, diff_mean.values, color="grey")
-ax2.fill_between(
-    time,
-    diff_low.values,
-    diff_up.values,
-    color="red",
-    alpha=0.3,
-)
+    hist_1000 = integrate_global_ohc(OHC_2D_hist_tot, area_oce, scale=ECHELLE_OHC)
+    hist_3000 = integrate_global_ohc(OHC_2D_hist_3000, area_oce, scale=ECHELLE_OHC)
 
-ax2.hlines(rm_diff_mean, 1995, 2014, colors="purple", linewidth=3)
-ax2.errorbar(
-    x=2005,
-    y=rm_diff_mean,
-    yerr=[[rm_diff_mean - rm_diff_low], [rm_diff_up - rm_diff_mean]],
-    fmt="o",
-    color="purple",
-    capsize=5,
-)
+    # Anomalies relative to first 50 years (1850-1899)
+    pic_1000 = anomalies(pic_1000)
+    pic_3000 = anomalies(pic_3000)
+    hist_1000 = anomalies(hist_1000)
+    hist_3000 = anomalies(hist_3000)
 
-ax2.set_ylabel(f"OHC / {ref_start}-{ref_end} ({unit})", fontsize=20)
-ax2.set_xlabel("Year", fontsize=20)
-ax2.tick_params(axis="both", labelsize=20)
-ax2.axvspan(ref_start, ref_end, color="grey", alpha=0.2)
-ax2.axvspan(p_start, p_end, color="grey", alpha=0.2)
-ax2.axhline(0, color="green", linewidth=3)
-ax2.grid()
-ax2.set_title("Hist_dd+3000 - Hist_dd+1000", fontsize=25, fontweight="bold")
+    # Bootstrap raw time series
+    pic_1000 = boot(pic_1000, n_boot=N_BOOT)
+    pic_3000 = boot(pic_3000, n_boot=N_BOOT)
+    hist_1000 = boot(hist_1000, n_boot=N_BOOT)
+    hist_3000 = boot(hist_3000, n_boot=N_BOOT)
 
-ax2.text(
-    -0.08, 1.02, panel_labels[1],
-    transform=ax2.transAxes,
-    ha="right", va="bottom",
-    fontsize=22,
-    fontweight="bold",
-    clip_on=False,
-)
+    # -------------------------------------------------------------------------
+    # Dedrifted historical response: hist - matched pic
+    # Keep 2D fields first, then integrate globally
+    # -------------------------------------------------------------------------
+    OHC_dd_1000 = time_matching(OHC_2D_hist_tot, OHC_2D_pic_tot)
+    OHC_dd_3000 = time_matching(OHC_2D_hist_3000, OHC_2D_pic_3000)
 
-bar_handles = [
-    Patch(facecolor=bar_colors[k], edgecolor="none", label=bar_labels[k])
-    for k in range(len(bar_labels))
-]
+    OHC_dd_1000 = anomalies(OHC_dd_1000)
+    OHC_dd_3000 = anomalies(OHC_dd_3000)
 
-fig.legend(
-    handles=bar_handles,
-    loc="upper center",
-    ncol=5,
-    frameon=False,
-    fontsize=20,
-    bbox_to_anchor=(0.5, -0.01),
-)
+    ohc_dd_1000 = integrate_global_ohc(OHC_dd_1000, area_oce, scale=ECHELLE_OHC)
+    ohc_dd_3000 = integrate_global_ohc(OHC_dd_3000, area_oce, scale=ECHELLE_OHC)
 
-plt.tight_layout(h_pad=3)
-plt.show()
+    # Mean gain over final 20 years
+    m_ohc_dd_1000 = gain(ohc_dd_1000)
+    m_ohc_dd_3000 = gain(ohc_dd_3000)
+
+    # Bootstrap dedrifted time series and gain differences
+    diff_hist_cor = boot_diff(ohc_dd_1000, ohc_dd_3000, n_boot=N_BOOT)
+    m_diff_hist_cor = boot_diff(m_ohc_dd_1000, m_ohc_dd_3000, n_boot=N_BOOT)
+
+    # Extract scalar stats for the late-period mean difference
+    rm_diff_low, rm_diff_mean, rm_diff_up = get_scalar_stats(m_diff_hist_cor)
+
+    # -------------------------------------------------------------------------
+    # Figure
+    # -------------------------------------------------------------------------
+    fig, axes = plt.subplots(2, 1, figsize=(15, 15), sharex=True)
+    ax1, ax2 = axes
+
+    panel_labels = ["a)", "b)"]
+
+    # ============================================================
+    # SUBPLOT 1: raw historical and piControl-derived responses
+    # ============================================================
+    time = pic_1000.time.values + REF_START
+
+    plot_ci(
+        ax1, time, pic_1000,
+        line_color=colors["rouge foncé"],
+        fill_color=colors["rouge clair"],
+    )
+    plot_ci(
+        ax1, time, pic_3000,
+        line_color=colors["bleu foncé"],
+        fill_color=colors["blue clair"],
+    )
+    plot_ci(
+        ax1, time, hist_1000,
+        line_color=colors["orange foncé"],
+        fill_color=colors["orange clair"],
+    )
+    plot_ci(
+        ax1, time, hist_3000,
+        line_color=colors["teal foncé"],
+        fill_color=colors["teal clair"],
+    )
+
+    ax1.set_ylabel(f"OHC anomaly relative to {REF_START}-{REF_END} ({UNIT})", fontsize=20)
+    ax1.set_title("CNRM-CM6.1 working ensembles", fontsize=25, fontweight="bold")
+    ax1.tick_params(axis="both", labelsize=18)
+    ax1.axvspan(REF_START, REF_END, color="grey", alpha=0.2)
+    ax1.grid()
+
+    ax1.text(
+        -0.08, 1.02, panel_labels[0],
+        transform=ax1.transAxes,
+        ha="right", va="bottom",
+        fontsize=22,
+        fontweight="bold",
+        clip_on=False,
+    )
+
+    # ============================================================
+    # SUBPLOT 2: difference of dedrifted historical responses
+    # ============================================================
+    diff_low, diff_mean, diff_up = get_stats(diff_hist_cor)
+    time = diff_mean.time.values + REF_START
+
+    ax2.plot(time, diff_mean.values, color="grey", linewidth=2.5)
+    ax2.fill_between(
+        time,
+        diff_low.values,
+        diff_up.values,
+        color="red",
+        alpha=0.3,
+    )
+
+    # Late-period mean difference
+    ax2.hlines(
+        rm_diff_mean,
+        PERIOD_GAIN_START,
+        PERIOD_GAIN_END,
+        colors="purple",
+        linewidth=3,
+    )
+    ax2.errorbar(
+        x=0.5 * (PERIOD_GAIN_START + PERIOD_GAIN_END),
+        y=rm_diff_mean,
+        yerr=[[rm_diff_mean - rm_diff_low], [rm_diff_up - rm_diff_mean]],
+        fmt="o",
+        color="purple",
+        capsize=5,
+    )
+
+    ax2.set_ylabel(f"OHC anomaly relative to {REF_START}-{REF_END} ({UNIT})", fontsize=20)
+    ax2.set_xlabel("Year", fontsize=20)
+    ax2.tick_params(axis="both", labelsize=18)
+    ax2.axvspan(REF_START, REF_END, color="grey", alpha=0.2)
+    ax2.axvspan(PERIOD_GAIN_START, PERIOD_GAIN_END, color="grey", alpha=0.2)
+    ax2.axhline(0, color="green", linewidth=3)
+    ax2.grid()
+    ax2.set_title("Hist_dd+3000 - Hist_dd+1000", fontsize=25, fontweight="bold")
+
+    ax2.text(
+        -0.08, 1.02, panel_labels[1],
+        transform=ax2.transAxes,
+        ha="right", va="bottom",
+        fontsize=22,
+        fontweight="bold",
+        clip_on=False,
+    )
+
+    # ============================================================
+    # Legend
+    # ============================================================
+    legend_handles = [
+        Patch(facecolor=colors["orange foncé"], edgecolor="none", label="Hist_dd+1000"),
+        Patch(facecolor=colors["teal foncé"], edgecolor="none", label="Hist_dd+3000"),
+        Patch(facecolor=colors["rouge foncé"], edgecolor="none", label="Pic+1000"),
+        Patch(facecolor=colors["bleu foncé"], edgecolor="none", label="Pic+3000"),
+        Patch(facecolor=colors["rouge clair"], edgecolor="none", label="Hist_dd+3000 - Hist_dd+1000"),
+    ]
+
+    fig.legend(
+        handles=legend_handles,
+        loc="upper center",
+        ncol=5,
+        frameon=False,
+        fontsize=18,
+        bbox_to_anchor=(0.5, -0.01),
+    )
+
+    plt.tight_layout(h_pad=3)
+
+    # Save
+    plt.savefig(FIG_DIR / "figure5.pdf", bbox_inches="tight")
+    plt.savefig(FIG_DIR / "figure5.png", dpi=300, bbox_inches="tight")
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
