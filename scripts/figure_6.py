@@ -58,8 +58,8 @@ from functions.utils import (
 # -----------------------------------------------------------------------------
 # Physical constants
 # -----------------------------------------------------------------------------
-ECHELLE_OHC = 1e21  # convert J to ZJ
-UNIT = "ZJ"
+ECHELLE_OHC = 1e9  # convert J to GJ
+UNIT = "GJ"
 
 REF_START = 1850
 REF_END = 1899
@@ -95,10 +95,6 @@ hist_cor_anom_1000 = boot(OHC_dd_1000)
 hist_cor_anom_3000 = boot(OHC_dd_3000)
 diff_hist_cor = boot_diff(OHC_dd_1000, OHC_dd_3000)
 
-m_hist_cor_1000 = boot(m_OHC_dd_1000)
-m_hist_cor_3000 = boot(m_OHC_dd_3000)
-m_diff_hist_cor = boot_diff(m_OHC_dd_1000, m_OHC_dd_3000)
-
 pic_1000_low, pic_1000_mean, pic_1000_up = get_stats(pic_1000)
 pic_3000_low, pic_3000_mean, pic_3000_up = get_stats(pic_3000)
 
@@ -106,16 +102,7 @@ hist_1000_low, hist_1000_mean, hist_1000_up = get_stats(hist_1000)
 hist_3000_low, hist_3000_mean, hist_3000_up = get_stats(hist_3000)
 
 diff_low, diff_mean, diff_up = get_stats(diff_hist_cor)
-rm_diff_low, rm_diff_mean, rm_diff_up = get_scalar_stats(m_diff_hist_cor)
 
-
-
-# -----------------------------
-# DATA
-# -----------------------------
-boot_3000 = xr.open_mfdataset(f"{edir}/scripts_and_data_for_RachelSeguy/boot_3000_165y_LinRegr_M1_0_btm.nc") #165y_LinRegr_M1
-boot_1000 = xr.open_mfdataset(f"{edir}/scripts_and_data_for_RachelSeguy/boot_1000_165y_LinRegr_M1_0_btm.nc")
-boot_diff = xr.open_mfdataset(f"{edir}/scripts_and_data_for_RachelSeguy/boot_diff_165y_LinRegr_M1_0_btm.nc")
 
 
 vmin, vmax = -5, 5
