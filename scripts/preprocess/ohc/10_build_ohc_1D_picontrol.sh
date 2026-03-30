@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 # Metadata
-AREACELLO_FILE="${REPO_ROOT}/data/metadata/areacello.nc"
+AREACELLO_FILE="${REPO_ROOT}/../data/metadata/areacello_Ofx_CNRM-CM6-1_piControl_r1i1p1f2_gn.nc"
 
 # Input/output directories
 IN_DIR="/cnrm/ioga/Users/seguy/pic_ens"

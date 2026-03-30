@@ -29,7 +29,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 
-BRANCH_FILE="${REPO_ROOT}/data/metadata/hist_start_years.nc"
+BRANCH_FILE="${REPO_ROOT}/../data/metadata/hist_start_years.nc"
 
 
 PIC_INPUT_DIR="/cnrm/ioga/Users/seguy/pic_ens"
