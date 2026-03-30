@@ -7,8 +7,8 @@ shopt -s nullglob
 # Assemble piControl AMOC pseudo-members r1-r29 into one ensemble file
 # ------------------------------------------------------------------
 
-IN_DIR="/cnrm/ioga/Users/seguyr/pic_ens/pic_amoc"
-OUT_DIR="/cnrm/ioga/Users/seguyr/pic_ens/pic_tot"
+IN_DIR="/cnrm/ioga/Users/seguy/pic_ens/pic_amoc"
+OUT_DIR="/cnrm/ioga/Users/seguy/pic_ens/pic_tot"
 
 mkdir -p "${OUT_DIR}"
 
