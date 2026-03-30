@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-for member in $(seq 2 40); do
+for member in $(seq 2 5); do
     echo "=============================="
     echo "Processing member ${member}"
     echo "=============================="
