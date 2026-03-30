@@ -241,7 +241,6 @@ def main():
 
     # Save figure
     plt.savefig(FIG_DIR / "figure_1.pdf", bbox_inches="tight")
-    plt.show()
 
 
 if __name__ == "__main__":
