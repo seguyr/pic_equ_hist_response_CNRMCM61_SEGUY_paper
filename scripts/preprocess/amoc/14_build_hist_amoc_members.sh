@@ -27,7 +27,7 @@ var = "msftyz"
 rho = 1026.0
 echelle_amoc = 1e6
 
-for member in range(2, 41):
+for member in range(2, 5):
     print(f"Processing historical AMOC r{member}")
 
     pattern = (
