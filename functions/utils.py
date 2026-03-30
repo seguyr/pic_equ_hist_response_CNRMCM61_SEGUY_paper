@@ -18,13 +18,13 @@ MASK_FILE = METADATA_DIR / "mask.nc"
 
 DATA_ROOT = Path("/cnrm/ioga/Users/seguyr")
 
-DIR_HIST_TOT = DATA_ROOT / "hist_ens/hist_tot"
-DIR_HIST_3000 = DATA_ROOT / "hist_ens/hist_3000"
+DIR_HIST_TOT = DATA_ROOT / "hist_ens_2/hist_tot"
+DIR_HIST_3000 = DATA_ROOT / "hist_ens_2/hist_3000"
 
-DIR_PIC_TOT = DATA_ROOT / "pic_ens/pic_tot"
-DIR_PIC_3000 = DATA_ROOT / "pic_ens/pic_3000"
+DIR_PIC_TOT = DATA_ROOT / "pic_ens_2/pic_tot"
+DIR_PIC_3000 = DATA_ROOT / "pic_ens_2/pic_3000"
 
-DIR_PIC = DATA_ROOT / "pic_ens/pic"
+DIR_PIC = DATA_ROOT / "pic_ens_2/pic"
 
 STATS_COORD = ["lower", "mean", "upper", "sigma", "p_value"]
 N_BOOT = 1000
