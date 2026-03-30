@@ -65,7 +65,7 @@ for LAYER in "${LAYERS[@]}"; do
 
     member_files=()
 
-    for MEMBER in $(seq 2 30); do
+    for MEMBER in $(seq 2 5); do
         f="${IN_DIR}/${PREFIX_IN}_r${MEMBER}.nc"
 
         if [ ! -f "$f" ]; then
