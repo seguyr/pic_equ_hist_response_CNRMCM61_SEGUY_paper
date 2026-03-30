@@ -95,16 +95,6 @@ hist_cor_anom_1000 = boot(OHC_dd_1000)
 hist_cor_anom_3000 = boot(OHC_dd_3000)
 diff_hist_cor = boot_diff(OHC_dd_1000, OHC_dd_3000)
 
-pic_1000_low, pic_1000_mean, pic_1000_up = get_stats(pic_1000)
-pic_3000_low, pic_3000_mean, pic_3000_up = get_stats(pic_3000)
-
-hist_1000_low, hist_1000_mean, hist_1000_up = get_stats(hist_1000)
-hist_3000_low, hist_3000_mean, hist_3000_up = get_stats(hist_3000)
-
-diff_low, diff_mean, diff_up = get_stats(diff_hist_cor)
-
-
-
 vmin, vmax = -5, 5
 white_width = 0.01 * (vmax - vmin)
 
@@ -135,9 +125,9 @@ gs = fig.add_gridspec(
 axes = [fig.add_subplot(gs[i, 0], projection=proj) for i in range(3)]
 cax  = fig.add_subplot(gs[:, 1])
 
-cf = plot_panel(axes[0], boot_1000, "Hist_dd +1000", "a)")
-plot_panel(axes[1], boot_3000, "Hist_dd +3000", "b)")
-plot_panel(axes[2], boot_diff, "Hist_dd +3000 − Hist_dd +1000", "c)")
+cf = plot_panel(axes[0], hist_cor_anom_1000, "Hist_dd +1000", "a)")
+plot_panel(axes[1], hist_cor_anom_3000, "Hist_dd +3000", "b)")
+plot_panel(axes[2], diff_hist_cor, "Hist_dd +3000 − Hist_dd +1000", "c)")
 
 cbar = fig.colorbar(
     cf, cax=cax,
