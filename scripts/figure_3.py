@@ -115,17 +115,18 @@ stats_400 = xr.concat(
 # -----------------------------------------------------------------------------
 # Colormap
 # -----------------------------------------------------------------------------
-vmin, vmax = -3, 3
-white_width = 0.01 * (vmax - vmin)
 
-bounds = np.linspace(vmin, vmax, 256)
+VMIN, VMAX = -3, 3
+WHITE_WIDTH = 0.01 * (VMAX - VMIN)
+
+bounds = np.linspace(VMIN, VMAX, 256)
 colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
-i0_low = np.argmin(np.abs(bounds + white_width))
-i0_high = np.argmin(np.abs(bounds - white_width))
+i0_low = np.argmin(np.abs(bounds + WHITE_WIDTH))
+i0_high = np.argmin(np.abs(bounds - WHITE_WIDTH))
 colors[i0_low:i0_high] = [1, 1, 1, 1]
 
-cmap_custom = mcolors.ListedColormap(colors)
-norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+CMAP_CUSTOM = mcolors.ListedColormap(colors)
+NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
 
 # -----------------------------------------------------------------------------
 # Figure
@@ -148,8 +149,8 @@ axes = [
 
 cax = fig.add_subplot(gs[1, :])
 
-cf = plot_panel(axes[0], stats_1000, "Pic+1000", "a)", cmap_custom, norm)
-plot_panel(axes[1], stats_400, "Pic+3000", "b)", cmap_custom, norm)
+cf = plot_panel(axes[0], stats_1000, "Pic+1000", "a)", CMAP_CUSTOM, NORM)
+plot_panel(axes[1], stats_400, "Pic+3000", "b)", CMAP_CUSTOM, NORM)
 
 cbar = fig.colorbar(
     cf,
