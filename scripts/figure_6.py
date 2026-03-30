@@ -50,8 +50,7 @@ from functions.utils import (
     gain,
     boot,
     boot_diff,
-    get_stats,
-    get_scalar_stats,
+    plot_panel,
     COLORS
 )
 
