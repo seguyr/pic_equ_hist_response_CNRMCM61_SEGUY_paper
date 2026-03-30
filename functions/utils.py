@@ -95,13 +95,7 @@ def load_branching_years():
 def _first_data_var(ds: xr.Dataset) -> xr.DataArray:
     """Return the first data variable of a Dataset."""
     return ds[list(ds.data_vars)[0]]
-
-def load_ohc_2d_ensembles():
-    hist_tot = _first_data_var(xr.open_dataset(DIR_HIST_TOT / "ohc_2D_hist_tot.nc"))
-    hist_3000 = _first_data_var(xr.open_dataset(DIR_HIST_3000 / "ohc_2D_hist_3000.nc"))
-    pic_tot = _first_data_var(xr.open_dataset(DIR_PIC_TOT / "ohc_2D_pic_tot.nc"))
-    pic_3000 = _first_data_var(xr.open_dataset(DIR_PIC_3000 / "ohc_2D_pic_3000.nc"))
-    return hist_tot, hist_3000, pic_tot, pic_3000
+    
 
 def load_ohc_2d(dataset_type, layer="tot"):
     """
