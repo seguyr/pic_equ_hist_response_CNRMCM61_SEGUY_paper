@@ -8,8 +8,8 @@ shopt -s nullglob
 # Assemble historical AMOC members r31-r40 into one ensemble file
 # ------------------------------------------------------------------
 
-IN_DIR="/cnrm/ioga/Users/seguyr/hist_ens/amoc_members"
-OUT_DIR="/cnrm/ioga/Users/seguyr/hist_ens/hist_3000"
+IN_DIR="/cnrm/ioga/Users/seguy/hist_ens/amoc_members"
+OUT_DIR="/cnrm/ioga/Users/seguy/hist_ens/hist_3000"
 
 mkdir -p "${OUT_DIR}"
 
