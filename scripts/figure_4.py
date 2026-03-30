@@ -34,7 +34,7 @@ from functions.utils import (
     load_ohc_pic_global,
     fit_map_hac,
     plot_panel,
-    hac_to_stats_da
+    hac_to_stats_da,
 )
 
 # -----------------------------------------------------------------------------
@@ -115,21 +115,35 @@ for i, layer in enumerate(layers):
 
     lab_left = f"{chr(97 + 2*i)})"
     lab_right = f"{chr(97 + 2*i + 1)})"
-
-    mL = plot_panel_hac(
-        axL, col_titles[0], lab_left,
+    
+    ds_1000 = hac_to_stats_da(
         results[layer]["ci_low_1000"],
         results[layer]["slope_1000"],
         results[layer]["ci_high_1000"],
-        cmap_row, norm_row
     )
 
-    mR = plot_panel_hac(
-        axR, col_titles[1], lab_right,
+    ds_400 = hac_to_stats_da(
         results[layer]["ci_low_400"],
         results[layer]["slope_400"],
         results[layer]["ci_high_400"],
-        cmap_row, norm_row
+    )
+
+    mL = plot_panel(
+        axL,
+        ds_1000,
+        col_titles[0],
+        lab_left,
+        cmap_row,
+        norm_row,
+    )
+
+    mR = plot_panel(
+        axR,
+        ds_400,
+        col_titles[1],
+        lab_right,
+        cmap_row,
+        norm_row,
     )
 
     cbar = fig.colorbar(
