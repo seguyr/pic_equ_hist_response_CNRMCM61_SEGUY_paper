@@ -16,7 +16,7 @@ OUTFILE="${OUT_DIR}/amoc_pic_tot.nc"
 
 member_files=()
 
-for MEMBER in $(seq 1 29); do
+for MEMBER in $(seq 1 5); do
     f="${IN_DIR}/amoc_pic_r${MEMBER}.nc"
 
     if [ ! -f "$f" ]; then
