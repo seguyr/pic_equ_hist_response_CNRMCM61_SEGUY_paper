@@ -238,7 +238,16 @@ def get_ci(arr: xr.DataArray):
 def get_scalar_stats(arr: xr.DataArray):
     lower, mean, upper = get_stats(arr)
     return float(lower.values), float(mean.values), float(upper.values)
-
+    
+def hac_to_stats_da(low, mean, up):
+    return xr.concat(
+        [low,mean,up,
+            xr.full_like(mean, np.nan),
+            xr.full_like(mean, np.nan),
+        ],
+        dim=xr.IndexVariable("stats", STATS_COORD),
+    )
+    
 def remove_map_outline(ax):
     """Enlève complètement le contour noir (outline) de la projection."""
     if hasattr(ax, "outline_patch"):
