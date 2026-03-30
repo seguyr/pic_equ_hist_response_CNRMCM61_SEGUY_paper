@@ -1,5 +1,5 @@
 """
-Figure 7: piControl equilibrium diagnostics
+Figure 2: piControl equilibrium diagnostics
 This script plots:
 - TOA flux over the last 1500 simulated years,
 - rolling temperature trends (SAT, SST, DOT),
