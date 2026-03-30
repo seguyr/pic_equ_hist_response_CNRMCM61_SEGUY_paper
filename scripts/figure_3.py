@@ -37,6 +37,7 @@ from functions.utils import (  # noqa: E402
     fit_map_hac,
     plot_panel,
     STATS_COORD,
+    make_cmap_norm,
 )
 
 # -----------------------------------------------------------------------------
@@ -115,18 +116,7 @@ stats_400 = xr.concat(
 # -----------------------------------------------------------------------------
 # Colormap
 # -----------------------------------------------------------------------------
-
-VMIN, VMAX = -3, 3
-WHITE_WIDTH = 0.01 * (VMAX - VMIN)
-
-bounds = np.linspace(VMIN, VMAX, 256)
-colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
-i0_low = np.argmin(np.abs(bounds + WHITE_WIDTH))
-i0_high = np.argmin(np.abs(bounds - WHITE_WIDTH))
-colors[i0_low:i0_high] = [1, 1, 1, 1]
-
-CMAP_CUSTOM = mcolors.ListedColormap(colors)
-NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
+CMAP_CUSTOM, NORM = make_cmap_norm(VMIN, VMAX)
 
 # -----------------------------------------------------------------------------
 # Figure
