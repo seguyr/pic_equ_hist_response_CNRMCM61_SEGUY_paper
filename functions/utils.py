@@ -329,3 +329,66 @@ def rolling_mean_np(y, window=1500):
         moyennes.append(moyenne)
     return moyennes
 
+
+def linear_fit_hac_1d(y, conf=90, nlags=None):
+    y = np.asarray(y, dtype=float)
+    valid = np.isfinite(y)
+    if valid.sum() < 3:
+        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
+    yv = y[valid]
+    t = np.arange(len(y))[valid]
+    X = sm.add_constant(t)
+    if nlags is None:
+        n = len(yv)
+        nlags = int(np.floor(4 * (n / 100)**(2/9)))
+    fit = sm.OLS(yv, X).fit(cov_type="HAC", cov_kwds={"maxlags": nlags})
+    intercept = fit.params[0]
+    slope = fit.params[1]
+    stderr_slope = fit.bse[1]
+    pvalue = fit.pvalues[1]
+    alpha = 1 - conf / 100
+    z = norm.ppf(1 - alpha / 2)
+    ci_low = slope - z * stderr_slope
+    ci_high = slope + z * stderr_slope
+    return slope, intercept, stderr_slope, ci_low, ci_high, pvalue
+
+
+def fit_map_hac(da, conf=90, nlags=None):
+    ny = da.sizes["y"]
+    nx = da.sizes["x"]
+    slope = np.full((ny, nx), np.nan, dtype=float)
+    intercept = np.full((ny, nx), np.nan, dtype=float)
+    stderr_slope = np.full((ny, nx), np.nan, dtype=float)
+    ci_low = np.full((ny, nx), np.nan, dtype=float)
+    ci_high = np.full((ny, nx), np.nan, dtype=float)
+    pvalue = np.full((ny, nx), np.nan, dtype=float)
+    values = da.values  # shape = (time, y, x)
+    for j in range(ny):
+        for i in range(nx):
+            y = values[:, j, i]
+
+            s, a, se, low, high, p = linear_fit_hac_1d(
+                y, conf=conf, nlags=nlags
+            )
+
+            slope[j, i] = s
+            intercept[j, i] = a
+            stderr_slope[j, i] = se
+            ci_low[j, i] = low
+            ci_high[j, i] = high
+            pvalue[j, i] = p
+    ds_out = xr.Dataset(
+        data_vars=dict(
+            slope=(("y", "x"), slope),
+            intercept=(("y", "x"), intercept),
+            stderr_slope=(("y", "x"), stderr_slope),
+            ci_low=(("y", "x"), ci_low),
+            ci_high=(("y", "x"), ci_high),
+            pvalue=(("y", "x"), pvalue),
+        ),
+        coords={
+            "y": da["y"],
+            "x": da["x"],
+        }
+    )
+    return ds_out
