@@ -45,13 +45,10 @@ COLORS = {
     "blue_light": "#92c5de",
 }
 
-
-
 def load_area_ocean():
     """Load ocean grid-cell area from repository metadata."""
     ds = xr.open_dataset(AREACELLO_FILE)
     return ds["areacello"]
-
 
 def load_pic_ohc(scale):
     """Load full piControl global OHC time series (scaled to ZJ)."""
@@ -60,13 +57,11 @@ def load_pic_ohc(scale):
     ohc = ds[varname] / scale
     return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
 
-
 def load_pic_amoc():
     """Load full piControl AMOC time series (Sv)."""
     ds = xr.open_dataset(DIR_PIC / "amoc_picontrol.nc")
     amoc = ds["amoc"]
     return amoc.assign_coords(year=np.arange(amoc.sizes["year"]))
-
 
 def load_integrated_ohc(dataset_type):
     if dataset_type == "hist_tot":
@@ -82,7 +77,6 @@ def load_integrated_ohc(dataset_type):
     area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
     return (ds[varname] * area_oce).sum(dim=("x", "y"))
 
-
 def nemo_lon_lat(area_oce):
     """Return NEMO longitude/latitude with longitude discontinuity fixed."""
     area = area_oce.copy()
@@ -97,11 +91,9 @@ def load_branching_years():
     starty_3000 = hist_starty[29:39].values.tolist()
     return starty_tot, starty_3000
 
-
 def _first_data_var(ds: xr.Dataset) -> xr.DataArray:
     """Return the first data variable of a Dataset."""
     return ds[list(ds.data_vars)[0]]
-
 
 def load_ohc_2d_ensembles():
     hist_tot = _first_data_var(xr.open_dataset(DIR_HIST_TOT / "ohc_2D_hist_tot.nc"))
@@ -110,38 +102,21 @@ def load_ohc_2d_ensembles():
     pic_3000 = _first_data_var(xr.open_dataset(DIR_PIC_3000 / "ohc_2D_pic_3000.nc"))
     return hist_tot, hist_3000, pic_tot, pic_3000
 
-
 def time_matching(hist: xr.DataArray, pic: xr.DataArray) -> xr.DataArray:
     pic = pic.assign_coords(time=hist["time"])
     return hist - pic
-
 
 def anomalies(arr: xr.DataArray, ref_slice=slice(0, 50)) -> xr.DataArray:
     ref = arr.isel(time=ref_slice).mean(dim="time")
     return arr - ref
 
-
 def gain(arr: xr.DataArray, gain_slice=slice(145, 165)) -> xr.DataArray:
     return arr.isel(time=gain_slice).mean(dim="time")
-
-
-# ============================================================
-# Bootstrap functions
-# ============================================================
 
 def bootstrap(arr):
     """
     Bootstrap confidence intervals across the ensemble dimension.
     
-    Parameters
-    ----------
-    arr : xr.DataArray
-        Input array with an 'ensemble' dimension.
-        Can also contain additional dimensions such as time, x, y.
-    Returns
-    -------
-    xr.DataArray
-        DataArray with dimensions ('stats', ...)
     """
     if np.all(np.isnan(arr)):
         out_shape = tuple(arr.sizes[d] for d in arr.dims if d != "ensemble")
@@ -173,20 +148,10 @@ def bootstrap(arr):
         dim=xr.IndexVariable("stats", STATS_COORD),
     )
 
-
 def bootstrap_2(arr1, arr2):
     """
     Bootstrap confidence intervals for the difference between two ensembles:
     mean(arr2) - mean(arr1)
-
-    Parameters
-    ----------
-    arr1, arr2 : xr.DataArray
-        Input arrays with an 'ensemble' dimension.
-    Returns
-    -------
-    xr.DataArray
-        DataArray with dimensions ('stats', ...)
     """
     if np.all(np.isnan(arr1)) or np.all(np.isnan(arr2)):
         out = xr.full_like(arr1.isel(ensemble=0, drop=True), np.nan).expand_dims(stats=STATS_COORD)
@@ -240,7 +205,6 @@ def get_stats(arr: xr.DataArray):
     upper = arr.sel(stats="upper")
     return lower, mean, upper
 
-
 def get_ci(arr: xr.DataArray):
     lower, mean, upper = get_stats(arr)
     return mean, lower, upper
@@ -258,11 +222,12 @@ def remove_map_outline(ax):
     ax.patch.set_edgecolor("none")
     ax.patch.set_linewidth(0)
 
-def plot_panel(ax, ds, title, label, area_oce, cmap, norm):
+def plot_panel(ax, ds, title, label, cmap, norm):
     """
     Plot one spatial panel from a bootstrap DataArray.
     """
     low, mean, up = get_stats(ds)
+    area_oce = load_area_ocean()
     lon, lat = nemo_lon_lat(area_oce)
     ax.set_global()
     ax.coastlines(linewidth=0.55)
