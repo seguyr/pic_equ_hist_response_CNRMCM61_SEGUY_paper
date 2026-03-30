@@ -54,10 +54,6 @@ ohc_400 =  ohc_pic_gb.isel(time=slice(2600,3000))
 
 
 
-
-
-
-
 fit_map_1000 = fit_map_hac(ohc_1000, conf=90)
 slope_1000 = fit_map_1000["slope"]*100
 ci_low_1000 = fit_map_1000["ci_low"]*100
