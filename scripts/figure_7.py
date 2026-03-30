@@ -28,15 +28,15 @@ FIG_DIR.mkdir(exist_ok=True)
 # -----------------------------------------------------------------------------
 # Imports from project utilities
 # -----------------------------------------------------------------------------
-from functions.utils import (  # noqa: E402
-    load_area_ocean,
-    load_ohc_2d,
+from functions.utils import (
+    load_ohc_2d_layer,
     time_matching,
     anomalies,
     gain,
     boot,
     boot_diff,
     plot_panel,
+    make_cmap_norm,
 )
 
 # -----------------------------------------------------------------------------
@@ -64,17 +64,10 @@ row_limits = {
     "2000-bottom": (-1.5, 1.5),
 }
 
-white_frac = 0.01
-
-# -----------------------------------------------------------------------------
-# Helpers
-# -----------------------------------------------------------------------------
-
-
 # -----------------------------------------------------------------------------
 # Figure
 # -----------------------------------------------------------------------------
-area_oce = load_area_ocean()
+
 proj = ccrs.Robinson(central_longitude=0)
 
 fig = plt.figure(figsize=(16, 15))
@@ -92,10 +85,10 @@ for i, layer in enumerate(layers):
     # -------------------------------------------------------------
     # Load one layer
     # -------------------------------------------------------------
-    hist_1000 = load_ohc_2d("hist_tot", layer=layer) / ECHELLE_OHC
-    hist_3000 = load_ohc_2d("hist_3000", layer=layer) / ECHELLE_OHC
-    pic_1000 = load_ohc_2d("pic_tot", layer=layer) / ECHELLE_OHC
-    pic_3000 = load_ohc_2d("pic_3000", layer=layer) / ECHELLE_OHC
+    hist_1000 = load_ohc_2d_layer("hist_tot", layer=layer) / ECHELLE_OHC
+    hist_3000 = load_ohc_2d_layer("hist_3000", layer=layer) / ECHELLE_OHC
+    pic_1000 = load_ohc_2d_layer("pic_tot", layer=layer) / ECHELLE_OHC
+    pic_3000 = load_ohc_2d_layer("pic_3000", layer=layer) / ECHELLE_OHC
 
     # -------------------------------------------------------------
     # Dedrift + anomalies + gain
@@ -126,13 +119,13 @@ for i, layer in enumerate(layers):
     axes_grid[i][1] = axR
 
     vmin, vmax = row_limits[layer]
-    cmap_row, norm_row = make_cmap_norm(vmin, vmax, white_frac=white_frac)
+    cmap_row, norm_row = make_cmap_norm(vmin, vmax)
 
     lab_left = f"{chr(97 + 2*i)})"
     lab_right = f"{chr(97 + 2*i + 1)})"
 
-    mL = plot_panel(axL, hist_gain_1000, "", lab_left, area_oce, cmap_row, norm_row)
-    mR = plot_panel(axR, diff_hist_gain, "", lab_right, area_oce, cmap_row, norm_row)
+    mL = plot_panel(axL, hist_gain_1000, "", lab_left, cmap_row, norm_row)
+    mR = plot_panel(axR, diff_hist_gain, "", lab_right, cmap_row, norm_row)
 
     cbar = fig.colorbar(
         mR,
@@ -141,7 +134,7 @@ for i, layer in enumerate(layers):
         extend="both",
         extendfrac="auto",
     )
-    cbar.set_label("OHC gain (GJ m$^{-2}$)", fontsize=22, labelpad=16)
+    cbar.set_label(f"OHC gain ({UNIT} m$^{-2}$)", fontsize=22, labelpad=16)
     cbar.ax.tick_params(labelsize=20, length=6, width=1.1)
 
 
@@ -187,7 +180,6 @@ for i, layer in enumerate(layers):
 plt.tight_layout()
 
 plt.savefig(FIG_DIR / "figure6_layers.pdf", bbox_inches="tight")
-plt.savefig(FIG_DIR / "figure6_layers.png", dpi=300, bbox_inches="tight")
 plt.show()
 if __name__ == "__main__":
     main()
