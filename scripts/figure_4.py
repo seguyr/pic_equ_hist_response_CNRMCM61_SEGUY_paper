@@ -192,4 +192,4 @@ for i, layer in enumerate(layers):
 plt.tight_layout()
 
 plt.savefig(FIG_DIR / "figure_4.pdf", bbox_inches="tight")
-plt.show()
+
