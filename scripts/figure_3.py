@@ -38,6 +38,7 @@ from functions.utils import (  # noqa: E402
     plot_panel,
     STATS_COORD,
     make_cmap_norm,
+    load_pic_ohc_2d_layer,
 )
 
 # -----------------------------------------------------------------------------
@@ -53,21 +54,15 @@ ECHELLE = 1e9  # J m^-2 -> GJ m^-2
 UNIT = "GJ m$^{-2}$ century$^{-1}$"
 CONF = 90
 
-OHC_PIC_FILE = DIR_PIC / "pic_3000.nc"
 
 # -----------------------------------------------------------------------------
 # Load data
 # -----------------------------------------------------------------------------
-ds_pic = xr.open_dataset(OHC_PIC_FILE)
-varname = list(ds_pic.data_vars)[0]
-ohc_pic = ds_pic[varname]
+ohc_pic = load_pic_ohc_2d_layer("all", scale=1e9)
 
 # harmonize time coordinate if needed
 if "time" in ohc_pic.dims and ohc_pic.sizes["time"] == 3000:
     ohc_pic = ohc_pic.assign_coords(time=np.arange(3000))
-
-# convert to GJ m^-2
-ohc_pic = ohc_pic / ECHELLE
 
 # first 1000 years and last 400 years
 ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
