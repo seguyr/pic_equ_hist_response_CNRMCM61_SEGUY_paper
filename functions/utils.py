@@ -304,4 +304,24 @@ def make_cmap_norm(vmin, vmax):
     norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
     return cmap, norm
 
+def rolling_trend_np(y, window=1000):
+    y = np.asarray(y).astype(float)
+    N = len(y)
+    n_slopes = N - window + 1
+    slopes = np.empty(n_slopes)
+    years = np.arange(N)[window-1:] 
+    for i in range(n_slopes):
+        y_win = y[i:i+window]
+        t_win = np.arange(window)
+        # np.polyfit deg=1 retourne [pente, intercept]
+        slope, intercept = np.polyfit(t_win, y_win, 1)
+        slopes[i] = slope  # pente par unité de temps (année)
+    return slopes, years
+
+def rolling_mean_np(y, window=1500):
+    moyennes = []
+    for i in range(len(y) - window + 1):
+        moyenne = sum(y[i:i+window]) / window
+        moyennes.append(moyenne)
+    return moyennes
 
