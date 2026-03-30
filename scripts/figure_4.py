@@ -33,7 +33,8 @@ FIG_DIR.mkdir(exist_ok=True)
 from functions.utils import (
     load_ohc_pic_global,
     fit_map_hac,
-    plot_panel_hac,
+    plot_panel,
+    hac_to_stats_da
 )
 
 # -----------------------------------------------------------------------------
