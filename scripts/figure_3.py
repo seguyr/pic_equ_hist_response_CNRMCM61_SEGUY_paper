@@ -82,61 +82,6 @@ cmap_custom = mcolors.ListedColormap(colors)
 norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
 
 
-def remove_map_outline(ax):
-    """Enlève complètement le contour noir (outline) de la projection."""
-    if hasattr(ax, "outline_patch"):
-        ax.outline_patch.set_visible(False)
-    if "geo" in ax.spines:
-        ax.spines["geo"].set_visible(False)
-    ax.patch.set_edgecolor("none")
-    ax.patch.set_linewidth(0)
-
-def plot_panel(ax, title, label, lon2d, lat2d, low, mean,up):
-
-    ax.set_global()
-
-    # Coastlines/borders propres (publi)
-    ax.coastlines(linewidth=0.55)
-    ax.add_feature(cfeature.BORDERS, linewidth=0.35, linestyle=':')
-
-    # Champ principal
-    cf = ax.pcolormesh(
-        lon2d, lat2d, mean,
-        cmap=cmap_custom, norm=norm,
-        transform=ccrs.PlateCarree()
-    )
-
-    # Hachures : 0 ∈ IC (non significatif)
-    mask_non_sig = np.ma.masked_where((low >= 0) | (up <= 0), mean)
-    hatch = ax.contourf(
-        lon2d, lat2d, mask_non_sig,
-        hatches=['///'],
-        colors='none',
-        transform=ccrs.PlateCarree(),
-        zorder=2
-    )
-
-    # Style des hachures, compatible selon versions
-    if hasattr(hatch, "collections"):
-        for coll in hatch.collections:
-            coll.set_edgecolor("gray")
-            coll.set_linewidth(0.0)
-    else:
-        hatch.set_edgecolor("gray")
-        hatch.set_linewidth(0.0)
-        
-    # Titres + labels a) b) c)
-    ax.set_title(title, fontsize=20, pad=8, fontweight="bold")
-    ax.text(
-        0.02, 0.96, label,
-        transform=ax.transAxes,
-        ha='left', va='top',
-        fontsize=20, fontweight='bold'
-    )
-
-    remove_map_outline(ax)
-
-    return cf
 
 # -----------------------------
 # FIGURE 
