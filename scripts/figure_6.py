@@ -1,3 +1,15 @@
+
+"""
+Figure 6: Historical spatial response comparison
+====================================================
+
+This script plots:
+- hist_tot map gain,
+- hist_3000 map gain,
+- the gain difference between historical OHC spatial responses after dedrifting by time matching.
+"""
+
+
 import numpy as np
 import xarray as xr
 from matplotlib import pyplot as plt
@@ -15,6 +27,86 @@ import cartopy.feature as cfeature
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
 
+
+# -----------------------------------------------------------------------------
+# Make the project root importable
+# -----------------------------------------------------------------------------
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(PROJECT_ROOT))
+
+# -----------------------------------------------------------------------------
+# Output directory for figures
+# -----------------------------------------------------------------------------
+FIG_DIR = PROJECT_ROOT / "figures"
+FIG_DIR.mkdir(exist_ok=True)
+
+# -----------------------------------------------------------------------------
+# Imports from project utilities
+# -----------------------------------------------------------------------------
+from functions.utils import (
+    load_ohc_2d_ensembles,
+    time_matching,
+    anomalies,
+    gain,
+    boot,
+    boot_diff,
+    get_stats,
+    get_scalar_stats,
+    COLORS
+)
+
+# -----------------------------------------------------------------------------
+# Physical constants
+# -----------------------------------------------------------------------------
+ECHELLE_OHC = 1e21  # convert J to ZJ
+UNIT = "ZJ"
+
+REF_START = 1850
+REF_END = 1899
+
+PERIOD_GAIN_START = 1995
+PERIOD_GAIN_END = 2014
+
+TIME_HIST = np.arange(165) + REF_START
+
+# -----------------------------------------------------------------------------
+# Calcul
+# -----------------------------------------------------------------------------
+
+hist_1000 = load_ohc_2d_ensembles("hist_tot") / ECHELLE_OHC
+hist_3000 = load_ohc_2d_ensembles("hist_3000") / ECHELLE_OHC
+pic_1000 = load_ohc_2d_ensembles("pic_tot") / ECHELLE_OHC
+pic_3000 = load_ohc_2d_ensembles("pic_3000") / ECHELLE_OHC
+
+# Dedrift by time matching
+OHC_dd_1000 = time_matching(hist_1000, pic_1000)
+OHC_dd_3000 = time_matching(hist_3000, pic_3000)
+
+# Anomalies relative to first 50 years
+OHC_dd_1000 = anomalies(OHC_dd_1000)
+OHC_dd_3000 = anomalies(OHC_dd_3000)
+
+# Mean gain over final 20 years
+m_OHC_dd_1000 = gain(OHC_dd_1000)
+m_OHC_dd_3000 = gain(OHC_dd_3000)
+
+# Bootstrap
+hist_cor_anom_1000 = boot(OHC_dd_1000)
+hist_cor_anom_3000 = boot(OHC_dd_3000)
+diff_hist_cor = boot_diff(OHC_dd_1000, OHC_dd_3000)
+
+m_hist_cor_1000 = boot(m_OHC_dd_1000)
+m_hist_cor_3000 = boot(m_OHC_dd_3000)
+m_diff_hist_cor = boot_diff(m_OHC_dd_1000, m_OHC_dd_3000)
+
+pic_1000_low, pic_1000_mean, pic_1000_up = get_stats(pic_1000)
+pic_3000_low, pic_3000_mean, pic_3000_up = get_stats(pic_3000)
+
+hist_1000_low, hist_1000_mean, hist_1000_up = get_stats(hist_1000)
+hist_3000_low, hist_3000_mean, hist_3000_up = get_stats(hist_3000)
+
+diff_low, diff_mean, diff_up = get_stats(diff_hist_cor)
+rm_diff_low, rm_diff_mean, rm_diff_up = get_scalar_stats(m_diff_hist_cor)
 
 
 
