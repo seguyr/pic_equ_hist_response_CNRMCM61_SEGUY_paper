@@ -13,7 +13,11 @@ import cartopy.feature as cfeature
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 METADATA_DIR = REPO_ROOT / "data" / "metadata"
-
+TAS_PIC_FILE = METADATA_DIR / "tas_pic_3000y.nc"
+TOS_PIC_FILE = METADATA_DIR / "tos_pic_3000y.nc"
+MOC_PIC_FILE = METADATA_DIR / "moc_pic_3000y.nc"
+DOT_PIC_FILE = METADATA_DIR / "dot_pic_3000y.nc"
+TOA_PIC_FILE = METADATA_DIR / "toa_pic_3000y.nc"
 HIST_START_YEARS_FILE = METADATA_DIR / "hist_start_years.nc"
 AREACELLO_FILE = METADATA_DIR / "areacello.nc"
 MASK_FILE = METADATA_DIR / "mask.nc"
