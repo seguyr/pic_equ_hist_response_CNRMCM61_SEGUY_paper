@@ -59,9 +59,7 @@ for filet in thetao_*.nc; do
 
     if [ ! -f "$yearly_file" ]; then
         echo "Yearly mean thetao: $filet"
-        ncks -3 "$filet" "${TMP_DIR}/${clean_file}"
-        cdo yearavg "${TMP_DIR}/${clean_file}" "$yearly_file"
-        rm -f "${TMP_DIR:?}/${clean_file}"
+        cdo -L yearmean "$filet" "$yearly_file"
     else
         echo "Already exists, skipping: $yearly_file"
     fi
@@ -80,9 +78,7 @@ for filet in thkcello_*.nc; do
 
     if [ ! -f "$yearly_file" ]; then
         echo "Yearly mean thkcello: $filet"
-        ncks -3 "$filet" "${TMP_DIR}/${clean_file}"
-        cdo yearavg "${TMP_DIR}/${clean_file}" "$yearly_file"
-        rm -f "${TMP_DIR:?}/${clean_file}"
+        cdo -L yearmean "$filet" "$yearly_file"
     else
         echo "Already exists, skipping: $yearly_file"
     fi
