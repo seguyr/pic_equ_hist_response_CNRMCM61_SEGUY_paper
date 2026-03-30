@@ -31,7 +31,7 @@ FIG_DIR.mkdir(exist_ok=True)
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    load_ohc_2d_ensembles,
+    load_integrated_ohc,
     time_matching,
     anomalies,
     gain,
