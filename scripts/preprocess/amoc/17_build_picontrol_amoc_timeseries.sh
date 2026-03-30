@@ -18,7 +18,7 @@ set -euo pipefail
 # ------------------------------------------------------------------
 
 MSFTYZ_GLOB="/cnrm/cmip/CMIP6/CMIP/CNRM-CERFACS/CNRM-CM6-1/piControl/r1i1p1f2/Omon/msftyz/gn/latest/*.nc"
-OUT_DIR="/cnrm/ioga/Users/seguyr/pic_ens/pic"
+OUT_DIR="/cnrm/ioga/Users/seguy/pic_ens/pic"
 OUT_FILE="${OUT_DIR}/amoc_picontrol.nc"
 
 mkdir -p "${OUT_DIR}"
