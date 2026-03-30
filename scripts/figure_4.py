@@ -31,10 +31,11 @@ FIG_DIR.mkdir(exist_ok=True)
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    load_ohc_pic_global,
+    load_pic_ohc_2d_layer,
     fit_map_hac,
     plot_panel,
     hac_to_stats_da,
+    make_cmap_norm,
 )
 
 # -----------------------------------------------------------------------------
@@ -69,7 +70,7 @@ row_limits = {
 results = {}
 
 for layer in layers:
-    ohc_pic =  load_pic_ohc_2d_layer(layer, scale=1e9)
+    ohc_pic =  load_pic_ohc_2d_layer(layer, scale=ECHELLE)
     ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
     ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
 
