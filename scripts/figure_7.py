@@ -29,7 +29,7 @@ FIG_DIR.mkdir(exist_ok=True)
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    load_ohc_2d_layer,
+    load_ohc_2d,
     time_matching,
     anomalies,
     gain,
@@ -85,10 +85,10 @@ for i, layer in enumerate(layers):
     # -------------------------------------------------------------
     # Load one layer
     # -------------------------------------------------------------
-    hist_1000 = load_ohc_2d_layer("hist_tot", layer=layer) / ECHELLE_OHC
-    hist_3000 = load_ohc_2d_layer("hist_3000", layer=layer) / ECHELLE_OHC
-    pic_1000 = load_ohc_2d_layer("pic_tot", layer=layer) / ECHELLE_OHC
-    pic_3000 = load_ohc_2d_layer("pic_3000", layer=layer) / ECHELLE_OHC
+    hist_1000 = load_ohc_2d("hist_tot", layer=layer) / ECHELLE_OHC
+    hist_3000 = load_ohc_2d("hist_3000", layer=layer) / ECHELLE_OHC
+    pic_1000 = load_ohc_2d("pic_tot", layer=layer) / ECHELLE_OHC
+    pic_3000 = load_ohc_2d("pic_3000", layer=layer) / ECHELLE_OHC
 
     # -------------------------------------------------------------
     # Dedrift + anomalies + gain
