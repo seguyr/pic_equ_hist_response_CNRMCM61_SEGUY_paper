@@ -9,24 +9,15 @@ This script plots:
 - the gain difference between historical OHC spatial responses after dedrifting by time matching.
 """
 
+from pathlib import Path
+import sys
 
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import xarray as xr
-from matplotlib import pyplot as plt
-import matplotlib.colors as mcolors
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-from dask.diagnostics import ProgressBar
-import datetime 
-from scipy import stats
-from matplotlib.cm import get_cmap
-from matplotlib.patches import Patch
-from matplotlib.lines import Line2D
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-import matplotlib.patches as mpatches
-import matplotlib.colors as mcolors
-
 
 # -----------------------------------------------------------------------------
 # Make the project root importable
