@@ -181,5 +181,3 @@ plt.tight_layout()
 
 plt.savefig(FIG_DIR / "figure6_layers.pdf", bbox_inches="tight")
 plt.show()
-if __name__ == "__main__":
-    main()
