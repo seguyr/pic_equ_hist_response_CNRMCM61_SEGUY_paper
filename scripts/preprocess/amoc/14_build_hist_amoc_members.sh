@@ -10,7 +10,7 @@ set -euo pipefail
 # ------------------------------------------------------------------
 
 EDIR_HIST="/cnrm/cmip/CMIP6/CMIP/CNRM-CERFACS/CNRM-CM6-1/historical"
-OUT_DIR="/cnrm/ioga/Users/seguyr/hist_ens/amoc_members"
+OUT_DIR="/cnrm/ioga/Users/seguy/hist_ens/amoc_members"
 
 mkdir -p "${OUT_DIR}"
 
