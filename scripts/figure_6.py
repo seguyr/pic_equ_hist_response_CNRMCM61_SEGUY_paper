@@ -135,9 +135,9 @@ gs = fig.add_gridspec(
 axes = [fig.add_subplot(gs[i, 0], projection=proj) for i in range(3)]
 cax  = fig.add_subplot(gs[:, 1])
 
-cf = plot_panel(axes[0], boot_1000, "Hist_dd +1000", "a)", lon2d_oce, lat2d_oce)
-plot_panel(axes[1], boot_3000, "Hist_dd +3000", "b)", lon2d_oce, lat2d_oce)
-plot_panel(axes[2], boot_diff, "Hist_dd +3000 − Hist_dd +1000", "c)", lon2d_oce, lat2d_oce)
+cf = plot_panel(axes[0], boot_1000, "Hist_dd +1000", "a)")
+plot_panel(axes[1], boot_3000, "Hist_dd +3000", "b)")
+plot_panel(axes[2], boot_diff, "Hist_dd +3000 − Hist_dd +1000", "c)")
 
 cbar = fig.colorbar(
     cf, cax=cax,
