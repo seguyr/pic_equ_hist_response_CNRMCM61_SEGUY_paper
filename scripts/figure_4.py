@@ -69,9 +69,7 @@ row_limits = {
 results = {}
 
 for layer in layers:
-    ohc_pic = load_ohc_pic_global(layer) / ECHELLE
-    ohc_pic = ohc_pic.assign_coords(time=np.arange(ohc_pic.sizes["time"]))
-
+    ohc_pic =  load_pic_ohc_2d_layer(layer, scale=1e9)
     ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
     ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
 
