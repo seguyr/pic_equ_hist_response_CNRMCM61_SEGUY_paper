@@ -235,4 +235,4 @@ fig.legend(
 
 plt.tight_layout(h_pad=3)
 plt.savefig(FIG_DIR / "figure_5.pdf", bbox_inches="tight")
-plt.show()
+
