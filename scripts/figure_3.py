@@ -59,11 +59,6 @@ CONF = 90
 # Load data
 # -----------------------------------------------------------------------------
 ohc_pic = load_pic_ohc_2d_layer("all", scale=1e9)
-
-# harmonize time coordinate if needed
-if "time" in ohc_pic.dims and ohc_pic.sizes["time"] == 3000:
-    ohc_pic = ohc_pic.assign_coords(time=np.arange(3000))
-
 # first 1000 years and last 400 years
 ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
 ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
