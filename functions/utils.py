@@ -97,7 +97,7 @@ def _first_data_var(ds: xr.Dataset) -> xr.DataArray:
     return ds[list(ds.data_vars)[0]]
     
 
-def load_ohc_2d(dataset_type, layer="tot"):
+def load_ohc_2d(dataset_type, layer="all"):
     """
     Load one preprocessed 2D OHC ensemble field.
     """
@@ -115,7 +115,7 @@ def load_ohc_2d(dataset_type, layer="tot"):
         prefix = "ohc_2D_pic_3000"
     else:
         raise ValueError(f"Unknown dataset_type: {dataset_type}")
-    if layer == "tot":
+    if layer == "all":
         filepath = base_dir / f"{prefix}.nc"
     elif layer in ["0-300", "300-2000", "2000-bottom"]:
         filepath = base_dir / f"{prefix}_{layer}.nc"
