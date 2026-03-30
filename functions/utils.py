@@ -44,6 +44,7 @@ COLORS = {
     "blue_dark": "#2166ac",
     "blue_light": "#92c5de",
 }
+WHITE_FRAC = 0.01
 
 def load_area_ocean():
     """Load ocean grid-cell area from repository metadata."""
@@ -295,4 +296,18 @@ def plot_panel(ax, ds, title, label, cmap, norm):
     )
     remove_map_outline(ax)
     return cf
+
+def make_cmap_norm(vmin, vmax):
+    white_width = WHITE_FRAC * (vmax - vmin)
+    bounds = np.linspace(vmin, vmax, 256)
+    colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
+
+    i0_low = np.argmin(np.abs(bounds + white_width))
+    i0_high = np.argmin(np.abs(bounds - white_width))
+    colors[i0_low:i0_high] = [1, 1, 1, 1]
+
+    cmap = mcolors.ListedColormap(colors)
+    norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+    return cmap, norm
+
 
