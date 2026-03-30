@@ -125,5 +125,3 @@ cbar.ax.tick_params(labelsize=20, length=7, width=1.2)
 
 plt.tight_layout()
 plt.savefig(FIG_DIR / "figure_3.pdf", bbox_inches="tight")
-
-plt.show()
