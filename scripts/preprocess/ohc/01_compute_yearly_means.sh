@@ -14,45 +14,35 @@
 # (OHC) computation performed in subsequent preprocessing steps.
 # ------------------------------------------------------------------
 
-
 set -euo pipefail
-
-# Compute yearly means for one historical ensemble member
-# Usage:
-#   bash scripts/preprocess/01_compute_yearly_means.sh 1
-#   bash scripts/preprocess/01_compute_yearly_means.sh 25
 
 MEMBER="${1:?Please provide a member number, e.g. 1 or 25}"
 
-REPO="/cnrm/ioga/Users/seguy/hist_ens/hist_${MEMBER}"
+OUT_DIR="/cnrm/ioga/Users/seguy/hist_ens/hist_${MEMBER}"
 THKCELLO_DIR="/cnrm/cmip6/CMIP/CNRM-CERFACS/CNRM-CM6-1/historical/r${MEMBER}i1p1f2/Omon/thkcello/gn/latest"
 THETAO_DIR="/cnrm/cmip6/CMIP/CNRM-CERFACS/CNRM-CM6-1/historical/r${MEMBER}i1p1f2/Omon/thetao/gn/latest"
 
-mkdir -p "${REPO}"
+mkdir -p "${OUT_DIR}"
 
 echo "=== Processing member r${MEMBER}i1p1f2 ==="
-echo "Output directory: ${REPO}"
+echo "Output directory: ${OUT_DIR}"
 
 # --- thkcello ---
 cd "${THKCELLO_DIR}" || exit 1
 for filet in thkcello_*.nc; do
     [ -e "$filet" ] || continue
-    file="${filet//@/}"
+    outfile="${OUT_DIR}/${filet/Omon/yearly}"
     echo "Processing thkcello file: $filet"
-    ncks -3 "$filet" "${REPO}/${file}"
-    cdo yearavg "${REPO}/${file}" "${REPO}/${file/Omon/yearly}"
-    rm -f "${REPO}/${file}"
+    cdo -L yearmean "$filet" "$outfile"
 done
 
 # --- thetao ---
 cd "${THETAO_DIR}" || exit 1
 for filet in thetao_*.nc; do
     [ -e "$filet" ] || continue
-    file="${filet//@/}"
+    outfile="${OUT_DIR}/${filet/Omon/yearly}"
     echo "Processing thetao file: $filet"
-    ncks -3 "$filet" "${REPO}/${file}"
-    cdo yearavg "${REPO}/${file}" "${REPO}/${file/Omon/yearly}"
-    rm -f "${REPO}/${file}"
+    cdo -L yearmean "$filet" "$outfile"
 done
 
 echo "Yearly means completed for member ${MEMBER}"
