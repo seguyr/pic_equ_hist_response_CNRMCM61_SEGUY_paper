@@ -2,16 +2,15 @@
 """
 Figure 6: Historical spatial response comparison
 ====================================================
-
 This script plots:
 - hist_tot map gain,
 - hist_3000 map gain,
-- the gain difference between historical OHC spatial responses after dedrifting by time matching.
+- the gain difference between historical OHC spatial responses after
+dedrifting by time matching.
 """
 
 from pathlib import Path
 import sys
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -52,11 +51,6 @@ ECHELLE_OHC = 1e9  # convert J to GJ
 UNIT = "GJ"
 
 REF_START = 1850
-REF_END = 1899
-
-PERIOD_GAIN_START = 1995
-PERIOD_GAIN_END = 2014
-
 TIME_HIST = np.arange(165) + REF_START
 
 # -----------------------------------------------------------------------------
@@ -79,10 +73,13 @@ NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
 # Calcul
 # -----------------------------------------------------------------------------
 
-hist_1000 = load_ohc_2d_ensembles("hist_tot") / ECHELLE_OHC
-hist_3000 = load_ohc_2d_ensembles("hist_3000") / ECHELLE_OHC
-pic_1000 = load_ohc_2d_ensembles("pic_tot") / ECHELLE_OHC
-pic_3000 = load_ohc_2d_ensembles("pic_3000") / ECHELLE_OHC
+hist_1000, hist_3000, pic_1000, pic_3000 = load_ohc_2d_ensembles()
+
+# Convert from J m^-2 to GJ m^-2
+hist_1000 = hist_1000 / ECHELLE_OHC
+hist_3000 = hist_3000 / ECHELLE_OHC
+pic_1000 = pic_1000 / ECHELLE_OHC
+pic_3000 = pic_3000 / ECHELLE_OHC
 
 # Dedrift by time matching
 OHC_dd_1000 = time_matching(hist_1000, pic_1000)
@@ -97,15 +94,14 @@ m_OHC_dd_1000 = gain(OHC_dd_1000)
 m_OHC_dd_3000 = gain(OHC_dd_3000)
 
 # Bootstrap
-hist_cor_anom_1000 = boot(OHC_dd_1000)
-hist_cor_anom_3000 = boot(OHC_dd_3000)
-diff_hist_cor = boot_diff(OHC_dd_1000, OHC_dd_3000)
+hist_gain_1000 = boot(m_ohc_dd_1000)
+hist_gain_3000 = boot(m_ohc_dd_3000)
+diff_hist_gain = boot_diff(m_ohc_dd_1000, m_ohc_dd_3000)
 
 # -----------------------------
 # FIGURE 
 # -----------------------------
 proj = ccrs.Robinson(central_longitude=0)
-
 
 fig = plt.figure(figsize=(12.5, 16))
 gs = fig.add_gridspec(
@@ -128,7 +124,7 @@ cbar = fig.colorbar(
     extendfrac='auto'
 )
 
-cbar.set_label("OHC gain (GJ m$^{-2}$)", fontsize=24, labelpad=20)
+cbar.set_label(f"OHC gain ({UNIT} m$^{-2}$)", fontsize=24, labelpad=20)
 cbar.ax.tick_params(labelsize=22, length=7, width=1.2)
 
 plt.show()
