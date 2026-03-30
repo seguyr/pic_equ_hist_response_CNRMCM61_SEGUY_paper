@@ -240,7 +240,7 @@ def main():
     plt.tight_layout()
 
     # Save figure
-    plt.savefig(FIG_DIR / "figure1.pdf", bbox_inches="tight")
+    plt.savefig(FIG_DIR / "figure_1.pdf", bbox_inches="tight")
     plt.show()
 
 
