@@ -80,6 +80,10 @@ def load_integrated_ohc(dataset_type):
     area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
     return (ds[varname] * area_oce).sum(dim=("x", "y"))
 
+def nemo_lon_lat(area_oce) :
+    after_discont = ~(area_oce.lon.diff("x", label="upper") > 0).cumprod("x").astype(bool)
+    area_oce.lon[:,1:] = area_oce.lon[:,1:] + after_discont*360.
+    return area_oce.lon, area_oce.lat
 
 def load_branching_years():
     """Return branching years for both ensembles."""
@@ -236,7 +240,58 @@ def get_ci(arr: xr.DataArray):
     lower, mean, upper = get_stats(arr)
     return mean, lower, upper
 
-
 def get_scalar_stats(arr: xr.DataArray):
     lower, mean, upper = get_stats(arr)
     return float(lower.values), float(mean.values), float(upper.values)
+
+def remove_map_outline(ax):
+    """Enlève complètement le contour noir (outline) de la projection."""
+    if hasattr(ax, "outline_patch"):
+        ax.outline_patch.set_visible(False)
+    if "geo" in ax.spines:
+        ax.spines["geo"].set_visible(False)
+    ax.patch.set_edgecolor("none")
+    ax.patch.set_linewidth(0)
+
+def plot_panel(ax, ds, title, label):
+    low, mean, up = get_stats(ds)
+    ax.set_global()
+    # Coastlines/borders propres (publi)
+    ax.coastlines(linewidth=0.55)
+    ax.add_feature(cfeature.BORDERS, linewidth=0.35, linestyle=':')
+    # Champ principal
+    cf = ax.pcolormesh(
+        nemo_lon_lat(area_oce)[0], nemo_lon_lat(area_oce)[1], mean,
+        cmap=cmap_custom, norm=norm,
+        transform=ccrs.PlateCarree()
+    )
+    # Hachures : 0 ∈ IC (non significatif)
+    mask_non_sig = np.ma.masked_where((low >= 0) | (up <= 0), mean)
+    ax.contourf(
+        nemo_lon_lat(area_oce)[0], nemo_lon_lat(area_oce)[1], mask_non_sig,
+        hatches=['///'],
+        colors='none',
+        transform=ccrs.PlateCarree(),
+        zorder=2
+    )
+    hatch = ax.contourf(
+    nemo_lon_lat(area_oce)[0], nemo_lon_lat(area_oce)[1], mask_non_sig,
+    hatches=['///'],
+    colors='none',
+    transform=ccrs.PlateCarree(),
+    zorder=2
+    )
+    # rendre les hachures grises
+    for coll in hatch.collections:
+        coll.set_edgecolor('lightgray')
+        coll.set_linewidth(0.0)
+    # Titres + labels a) b) c)
+    ax.set_title(title, fontsize=16, pad=8, fontweight="bold")
+    ax.text(
+        0.02, 0.96, label,
+        transform=ax.transAxes,
+        ha='left', va='top',
+        fontsize=18, fontweight='bold'
+    )
+    remove_map_outline(ax)
+    return cf
