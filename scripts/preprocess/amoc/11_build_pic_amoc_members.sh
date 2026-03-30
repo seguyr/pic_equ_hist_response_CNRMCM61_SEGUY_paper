@@ -19,8 +19,8 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-BRANCH_FILE="${REPO_ROOT}/data/metadata/hist_start_years.nc"
-OUT_DIR="/cnrm/ioga/Users/seguyr/pic_ens/pic_amoc"
+BRANCH_FILE="${REPO_ROOT}/../data/metadata/hist_start_years.nc"
+OUT_DIR="/cnrm/ioga/Users/seguy/pic_ens/pic_amoc"
 MSFTYZ_GLOB="/cnrm/cmip/CMIP6/CMIP/CNRM-CERFACS/CNRM-CM6-1/piControl/r1i1p1f2/Omon/msftyz/gn/latest/*.nc"
 
 mkdir -p "${OUT_DIR}"
