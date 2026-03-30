@@ -68,19 +68,21 @@ ci_high_400 = fit_map_400["ci_high"]*100
 pvalue_400 = fit_map_400["pvalue"]*100
 
 
+# -----------------------------------------------------------------------------
+# Visualisation
+# -----------------------------------------------------------------------------
 
-vmin, vmax = -3, 3
-white_width = 0.01 * (vmax - vmin)
+VMIN, VMAX = -3, 3
+WHITE_WIDTH = 0.01 * (VMAX - VMIN)
 
-bounds = np.linspace(vmin, vmax, 256)
+bounds = np.linspace(VMIN, VMAX, 256)
 colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
-i0_low  = np.argmin(np.abs(bounds + white_width))
-i0_high = np.argmin(np.abs(bounds - white_width))
+i0_low = np.argmin(np.abs(bounds + WHITE_WIDTH))
+i0_high = np.argmin(np.abs(bounds - WHITE_WIDTH))
 colors[i0_low:i0_high] = [1, 1, 1, 1]
 
-cmap_custom = mcolors.ListedColormap(colors)
-norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
-
+CMAP_CUSTOM = mcolors.ListedColormap(colors)
+NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
 
 
 # -----------------------------
@@ -102,8 +104,8 @@ axes = [
 
 cax = fig.add_subplot(gs[1, :])  # colorbar sur toute la largeur
 
-cf = plot_panel(axes[0], "Pic+1000", "a)", lon2d_oce, lat2d_oce, ci_low_1000, slope_1000, ci_high_1000)
-plot_panel(axes[1], "Pic+3000", "b)", lon2d_oce, lat2d_oce, ci_low_400, slope_400, ci_high_400)
+cf = plot_panel(axes[0], "Pic+1000", "a)", CMAP_CUSTOM, NORM)
+plot_panel(axes[1], "Pic+3000", "b)", CMAP_CUSTOM, NORM)
 
 cbar = fig.colorbar(
     cf, cax=cax,
