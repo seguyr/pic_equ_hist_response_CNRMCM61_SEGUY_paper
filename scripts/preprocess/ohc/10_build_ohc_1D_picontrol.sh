@@ -23,7 +23,7 @@ AREACELLO_FILE="${REPO_ROOT}/../data/metadata/areacello_Ofx_CNRM-CM6-1_piControl
 
 # Input/output directories
 IN_DIR="/cnrm/ioga/Users/seguy/pic_ens"
-OUT_DIR="/cnrm/ioga/Users/seguyr/pic_ens/pic"
+OUT_DIR="/cnrm/ioga/Users/seguy/pic_ens/pic"
 TMP_DIR="${OUT_DIR}/tmp_ohc1D"
 
 mkdir -p "${OUT_DIR}" "${TMP_DIR}"
