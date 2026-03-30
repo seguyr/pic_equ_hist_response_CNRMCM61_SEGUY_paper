@@ -102,6 +102,33 @@ def load_ohc_2d_ensembles():
     pic_3000 = _first_data_var(xr.open_dataset(DIR_PIC_3000 / "ohc_2D_pic_3000.nc"))
     return hist_tot, hist_3000, pic_tot, pic_3000
 
+def load_ohc_2d(dataset_type, layer="tot"):
+    """
+    Load one preprocessed 2D OHC ensemble field.
+    """
+    if dataset_type == "hist_tot":
+        base_dir = DIR_HIST_TOT
+        prefix = "ohc_2D_hist_tot"
+    elif dataset_type == "hist_3000":
+        base_dir = DIR_HIST_3000
+        prefix = "ohc_2D_hist_3000"
+    elif dataset_type == "pic_tot":
+        base_dir = DIR_PIC_TOT
+        prefix = "ohc_2D_pic_tot"
+    elif dataset_type == "pic_3000":
+        base_dir = DIR_PIC_3000
+        prefix = "ohc_2D_pic_3000"
+    else:
+        raise ValueError(f"Unknown dataset_type: {dataset_type}")
+    if layer == "tot":
+        filepath = base_dir / f"{prefix}.nc"
+    elif layer in ["0-300", "300-2000", "2000-bottom"]:
+        filepath = base_dir / f"{prefix}_{layer}.nc"
+    else:
+        raise ValueError(f"Unknown layer: {layer}")
+    ds = xr.open_dataset(filepath)
+    return ds[list(ds.data_vars)[0]]
+
 def time_matching(hist: xr.DataArray, pic: xr.DataArray) -> xr.DataArray:
     pic = pic.assign_coords(time=hist["time"])
     return hist - pic
