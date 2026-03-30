@@ -58,7 +58,7 @@ CONF = 90
 # -----------------------------------------------------------------------------
 # Load data
 # -----------------------------------------------------------------------------
-ohc_pic = load_pic_ohc_2d_layer("all", scale=1e9)
+ohc_pic = load_pic_ohc_2d_layer("all", scale=ECHELLE)
 # first 1000 years and last 400 years
 ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
 ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
@@ -69,38 +69,16 @@ ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
 fit_map_1000 = fit_map_hac(ohc_1000, conf=CONF)
 fit_map_400 = fit_map_hac(ohc_400, conf=CONF)
 
-# convert slopes from per year to per century
-slope_1000 = fit_map_1000["slope"] * 100
-ci_low_1000 = fit_map_1000["ci_low"] * 100
-ci_high_1000 = fit_map_1000["ci_high"] * 100
-
-slope_400 = fit_map_400["slope"] * 100
-ci_low_400 = fit_map_400["ci_low"] * 100
-ci_high_400 = fit_map_400["ci_high"] * 100
-
-# -----------------------------------------------------------------------------
-# Convert HAC output to the format expected by plot_panel()
-# -----------------------------------------------------------------------------
-stats_1000 = xr.concat(
-    [
-        ci_low_1000,
-        slope_1000,
-        ci_high_1000,
-        xr.full_like(slope_1000, np.nan),
-        xr.full_like(slope_1000, np.nan),
-    ],
-    dim=xr.IndexVariable("stats", STATS_COORD),
+stats_1000 = hac_to_stats_da(
+    fit_map_1000["ci_low"] * 100,
+    fit_map_1000["slope"] * 100,
+    fit_map_1000["ci_high"] * 100,
 )
 
-stats_400 = xr.concat(
-    [
-        ci_low_400,
-        slope_400,
-        ci_high_400,
-        xr.full_like(slope_400, np.nan),
-        xr.full_like(slope_400, np.nan),
-    ],
-    dim=xr.IndexVariable("stats", STATS_COORD),
+stats_400 = hac_to_stats_da(
+    fit_map_400["ci_low"] * 100,
+    fit_map_400["slope"] * 100,
+    fit_map_400["ci_high"] * 100,
 )
 
 # -----------------------------------------------------------------------------
