@@ -86,22 +86,6 @@ for layer in layers:
         "ci_high_400": fit_map_400["ci_high"] * 100,
     }
 
-# -----------------------------------------------------------------------------
-# Colormap
-# -----------------------------------------------------------------------------
-
-VMIN, VMAX = -3, 3
-WHITE_WIDTH = 0.01 * (VMAX - VMIN)
-
-bounds = np.linspace(VMIN, VMAX, 256)
-colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
-i0_low = np.argmin(np.abs(bounds + WHITE_WIDTH))
-i0_high = np.argmin(np.abs(bounds - WHITE_WIDTH))
-colors[i0_low:i0_high] = [1, 1, 1, 1]
-
-CMAP_CUSTOM = mcolors.ListedColormap(colors)
-NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
-
 
 # -----------------------------------------------------------------------------
 # Figure
@@ -193,6 +177,5 @@ for i, layer in enumerate(layers):
 
 plt.tight_layout()
 
-plt.savefig(FIG_DIR / "figure_pic_trends_layers.pdf", bbox_inches="tight")
-plt.savefig(FIG_DIR / "figure_pic_trends_layers.png", dpi=300, bbox_inches="tight")
+plt.savefig(FIG_DIR / "figure_4.pdf", bbox_inches="tight")
 plt.show()
