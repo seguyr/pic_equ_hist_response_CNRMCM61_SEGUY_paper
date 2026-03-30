@@ -61,7 +61,26 @@ def load_pic_ohc(scale):
     varname = list(ds.data_vars)[0]
     ohc = ds[varname] / scale
     return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
-
+    
+def load_pic_ohc_2d_layer(layer, scale=1.0):
+    """
+    Load piControl 2D OHC field for a given vertical layer.
+    """
+    if layer == "all":
+        filename = "ohc_2D_picontrol.nc"
+    elif layer == "0_300":
+        filename = "ohc_2D_0-300_picontrol.nc"
+    elif layer == "300_2000":
+        filename = "ohc_2D_300-2000_picontrol.nc"
+    elif layer == "2000_btm":
+        filename = "ohc_2D_2000-bottom_picontrol.nc"
+    else:
+        raise ValueError(f"Unknown layer: {layer}")
+    ds = xr.open_dataset(DIR_PIC / filename)
+    varname = list(ds.data_vars)[0]
+    ohc = ds[varname] / scale
+    return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
+    
 def load_pic_amoc():
     """Load full piControl AMOC time series (Sv)."""
     ds = xr.open_dataset(DIR_PIC / "amoc_picontrol.nc")
