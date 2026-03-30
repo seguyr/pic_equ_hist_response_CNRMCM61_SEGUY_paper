@@ -177,7 +177,8 @@ for i, layer in enumerate(layers):
         fontsize=20, fontweight="bold"
     )
 
+
 plt.tight_layout()
 
-plt.savefig(FIG_DIR / "figure6_layers.pdf", bbox_inches="tight")
+plt.savefig(FIG_DIR / "figure_7.pdf", bbox_inches="tight")
 plt.show()
