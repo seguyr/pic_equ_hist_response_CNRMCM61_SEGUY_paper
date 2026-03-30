@@ -73,10 +73,10 @@ NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
 # Calcul
 # -----------------------------------------------------------------------------
 
-hist_1000 = load_ohc_2d("hist_tot", layer=layer) / ECHELLE_OHC
-hist_3000 = load_ohc_2d("hist_3000", layer=layer) / ECHELLE_OHC
-pic_1000 = load_ohc_2d("pic_tot", layer=layer) / ECHELLE_OHC
-pic_3000 = load_ohc_2d("pic_3000", layer=layer) / ECHELLE_OHC
+hist_1000 = load_ohc_2d("hist_tot", layer="all") / ECHELLE_OHC
+hist_3000 = load_ohc_2d("hist_3000", layer="all") / ECHELLE_OHC
+pic_1000 = load_ohc_2d("pic_tot", layer="all") / ECHELLE_OHC
+pic_3000 = load_ohc_2d("pic_3000", layer="all") / ECHELLE_OHC
 
 # Dedrift by time matching
 OHC_dd_1000 = time_matching(hist_1000, pic_1000)
