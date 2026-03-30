@@ -60,6 +60,22 @@ PERIOD_GAIN_END = 2014
 TIME_HIST = np.arange(165) + REF_START
 
 # -----------------------------------------------------------------------------
+# Visualisation
+# -----------------------------------------------------------------------------
+
+VMIN, VMAX = -5, 5
+WHITE_WIDTH = 0.01 * (VMAX - VMIN)
+
+bounds = np.linspace(VMIN, VMAX, 256)
+colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
+i0_low = np.argmin(np.abs(bounds + WHITE_WIDTH))
+i0_high = np.argmin(np.abs(bounds - WHITE_WIDTH))
+colors[i0_low:i0_high] = [1, 1, 1, 1]
+
+CMAP_CUSTOM = mcolors.ListedColormap(colors)
+NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
+
+# -----------------------------------------------------------------------------
 # Calcul
 # -----------------------------------------------------------------------------
 
@@ -84,18 +100,6 @@ m_OHC_dd_3000 = gain(OHC_dd_3000)
 hist_cor_anom_1000 = boot(OHC_dd_1000)
 hist_cor_anom_3000 = boot(OHC_dd_3000)
 diff_hist_cor = boot_diff(OHC_dd_1000, OHC_dd_3000)
-
-vmin, vmax = -5, 5
-white_width = 0.01 * (vmax - vmin)
-
-bounds = np.linspace(vmin, vmax, 256)
-colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
-i0_low  = np.argmin(np.abs(bounds + white_width))
-i0_high = np.argmin(np.abs(bounds - white_width))
-colors[i0_low:i0_high] = [1, 1, 1, 1]
-
-cmap_custom = mcolors.ListedColormap(colors)
-norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
 
 # -----------------------------
 # FIGURE 
