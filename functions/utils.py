@@ -21,8 +21,8 @@ DOT_PIC_FILE = PIC_GLOBAL_DIR / "dot_pic_3000y.nc"
 TOA_PIC_FILE = PIC_GLOBAL_DIR / "toa_pic_3000y.nc"
 OHC_PIC_FILE = PIC_GLOBAL_DIR / "heatc1D_yearly_CNRM-CM6-1_piControl_r1i1p1f2_gn_185001-484912.nc"
 HIST_START_YEARS_FILE = METADATA_DIR / "hist_start_years.nc"
-AREACELLO_FILE = METADATA_DIR / "areacello_Ofx_CNRM_CM6-1_piControl.nc"
-AREACELLA_FILE = METADATA_DIR / "areacella_fx_CNRM_CM6-1_piControl.nc"
+AREACELLO_FILE = METADATA_DIR / "areacello_Ofx_CNRM-CM6-1_piControl_r1i1p1f2_gn.nc"
+AREACELLA_FILE = METADATA_DIR / "areacella_fx_CNRM-CM6-1_piControl_r1i1p1f2_gr.nc"
 MASK_FILE = METADATA_DIR / "gsubpolmsk.nc"
 
 DATA_ROOT = Path("/cnrm/ioga/Users/seguyr")
