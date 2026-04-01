@@ -34,7 +34,7 @@ FIG_DIR.mkdir(exist_ok=True)
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    load_ohc_2d_ensembles,
+    load_2D_ohc,
     time_matching,
     anomalies,
     gain,
@@ -47,7 +47,7 @@ from functions.utils import (
 # -----------------------------------------------------------------------------
 # Physical constants
 # -----------------------------------------------------------------------------
-ECHELLE_OHC = 1e9  # convert J to GJ
+ECHELLE_OHC = 1e12  # convert ZJ to GJ
 UNIT = "GJ"
 
 REF_START = 1850
@@ -73,10 +73,10 @@ NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
 # Calcul
 # -----------------------------------------------------------------------------
 
-hist_1000 = load_ohc_2d("hist_tot", layer="all") / ECHELLE_OHC
-hist_3000 = load_ohc_2d("hist_3000", layer="all") / ECHELLE_OHC
-pic_1000 = load_ohc_2d("pic_tot", layer="all") / ECHELLE_OHC
-pic_3000 = load_ohc_2d("pic_3000", layer="all") / ECHELLE_OHC
+hist_1000 = load_2D_ohc("hist_tot", layer="0_btm") / ECHELLE_OHC
+hist_3000 = load_2D_ohc("hist_3000", layer="0_btm") / ECHELLE_OHC
+pic_1000 = load_2D_ohc("pic_tot", layer="0_btm") / ECHELLE_OHC
+pic_3000 = load_2D_ohc("pic_3000", layer="0_btm") / ECHELLE_OHC
 
 # Dedrift by time matching
 OHC_dd_1000 = time_matching(hist_1000, pic_1000)
@@ -87,8 +87,8 @@ OHC_dd_1000 = anomalies(OHC_dd_1000)
 OHC_dd_3000 = anomalies(OHC_dd_3000)
 
 # Mean gain over final 20 years
-m_OHC_dd_1000 = gain(OHC_dd_1000)
-m_OHC_dd_3000 = gain(OHC_dd_3000)
+m_ohc_dd_1000 = gain(OHC_dd_1000)
+m_ohc_dd_3000 = gain(OHC_dd_3000)
 
 # Bootstrap
 hist_gain_1000 = boot(m_ohc_dd_1000)

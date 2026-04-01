@@ -9,6 +9,7 @@ import numpy as np
 import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import re
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -64,30 +65,29 @@ def load_area_ocean():
 def load_pic_ohc_1D():
     """Load full piControl global OHC time series."""
     ds = xr.open_dataset(OHC_PIC_FILE)
-    varname = list(ds.data_vars)[0]
-    ohc = ds[varname].isel(lon=0).isel(lat=0)*CP*RHO*AREA_TOT
+    ohc = ds.thetao.isel(lon=0).isel(lat=0)*CP*RHO*AREA_TOT
     return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
-    
 
-def load_pic_ohc_2d_layer(layer, scale=1.0):
-    """
-    Load piControl 2D OHC field for a given vertical layer.
-    """
-    if layer == "all":
-        filename = "ohc_2D_picontrol.nc"
-    elif layer == "0_300":
-        filename = "ohc_2D_0-300_picontrol.nc"
-    elif layer == "300_2000":
-        filename = "ohc_2D_300-2000_picontrol.nc"
-    elif layer == "2000_btm":
-        filename = "ohc_2D_2000-bottom_picontrol.nc"
-    else:
-        raise ValueError(f"Unknown layer: {layer}")
-    ds = xr.open_dataset(DIR_PIC / filename)
-    varname = list(ds.data_vars)[0]
-    ohc = ds[varname] / scale
-    return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
     
+def load_2D_ohc(dataset_type, layer):
+    if dataset_type == "hist_tot":
+        filepath = DIR_HIST_TOT
+    elif dataset_type == "hist_3000":
+        filepath = DIR_HIST_3000
+    elif dataset_type == "pic_tot":
+        filepath = DIR_PIC_TOT
+    elif dataset_type == "pic_3000":
+        filepath = DIR_PIC_3000
+    else:
+        raise ValueError(f"Unknown dataset_type: {dataset_type}")
+    files = sorted(Path(filepath).glob(f"*{layer}*.nc"), key=natural_key)
+    ds = xr.open_mfdataset(
+        files,
+        combine="nested",
+        concat_dim="ensemble"
+    )
+    return ds.__xarray_dataarray_variable__.assign_coords(time=np.arange(ds.sizes["time"]))
+
 
 def load_pic_amoc():
     """Load full piControl AMOC time series (Sv)."""
@@ -95,20 +95,32 @@ def load_pic_amoc():
     amoc = ds.msftyz/(RHO*ECHELLE_AMOC)
     return amoc.assign_coords(year=np.arange(amoc.sizes["year"]))
 
+def natural_key(path):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(r'(\d+)', str(path))]
 
-def load_integrated_ohc(dataset_type,layer):
+def load_integrated_ohc(dataset_type, layer):
     if dataset_type == "hist_tot":
-        filepath = DIR_HIST_TOT 
+        filepath = DIR_HIST_TOT
     elif dataset_type == "hist_3000":
-        filepath = DIR_HIST_3000 
+        filepath = DIR_HIST_3000
     elif dataset_type == "pic_tot":
-        filepath = DIR_PIC_TOT 
+        filepath = DIR_PIC_TOT
     elif dataset_type == "pic_3000":
         filepath = DIR_PIC_3000
-    ds = xr.open_mfdataset(filepath/f"*{layer}*.nc", dim = "ensemble")
-    varname = list(ds.data_vars)[0]
+    else:
+        raise ValueError(f"Unknown dataset_type: {dataset_type}")
+
+    files = sorted(Path(filepath).glob(f"*{layer}*.nc"), key=natural_key)
+
+    ds = xr.open_mfdataset(
+        files,
+        combine="nested",
+        concat_dim="ensemble"
+    )
+
     area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
-    return (ds[varname] * area_oce).sum(dim=("x", "y"))
+    return (ds.__xarray_dataarray_variable__ * area_oce).sum(dim=("x", "y"))
 
 def nemo_lon_lat(area_oce):
     """Return NEMO longitude/latitude with longitude discontinuity fixed."""
@@ -190,8 +202,8 @@ def bootstrap(arr):
     resampled = arr.sel(ensemble=sampled_da)
     boot_means = resampled.mean(dim="ensemble")
     boot_means = boot_means.chunk(dict(boot=-1))
-    q_inf = boot_means.quantile(QT_INF, dim="boot")
-    q_sup = boot_means.quantile(QT_SUP, dim="boot")
+    q_inf = boot_means.quantile(QT_INF, dim="boot").reset_coords("quantile", drop=True)
+    q_sup = boot_means.quantile(QT_SUP, dim="boot").reset_coords("quantile", drop=True)
     mean = boot_means.mean(dim="boot")
     sigma = boot_means.std(dim="boot")
     p_left = (boot_means <= 0).mean(dim="boot")
@@ -222,8 +234,8 @@ def bootstrap_2(arr1, arr2):
     resampled_1 = arr1.sel(ensemble=sampled_da_1)
     resampled_2 = arr2.sel(ensemble=sampled_da_2)
     boot_means = resampled_2.mean(dim="ensemble") - resampled_1.mean(dim="ensemble")
-    q_inf = boot_means.quantile(QT_INF, dim="boot")
-    q_sup = boot_means.quantile(QT_SUP, dim="boot")
+    q_inf = boot_means.quantile(QT_INF, dim="boot").reset_coords("quantile", drop=True)
+    q_sup = boot_means.quantile(QT_SUP, dim="boot").reset_coords("quantile", drop=True)
     mean = boot_means.mean(dim="boot")
     sigma = boot_means.std(dim="boot")
     p_left = (boot_means <= 0).mean(dim="boot")
@@ -234,24 +246,16 @@ def bootstrap_2(arr1, arr2):
         dim=xr.IndexVariable("stats", STATS_COORD),
     )
 
-def to_bootstrap_xarray(result, template: xr.DataArray) -> xr.DataArray:
-    out_dims = tuple(d for d in template.dims if d != "ensemble")
-    out_coords = {d: template.coords[d] for d in out_dims}
-    return xr.DataArray(
-        result,
-        dims=("stats",) + out_dims,
-        coords={"stats": STATS_COORD, **out_coords},
-    )
 
 def boot(arr: xr.DataArray):
     """Run bootstrap and return a formatted xarray.DataArray."""
     result = bootstrap(arr)
-    return to_bootstrap_xarray(result, arr)
+    return result
 
 def boot_diff(arr1: xr.DataArray, arr2: xr.DataArray):
     """Run bootstrap_2 and return a formatted xarray.DataArray."""
     result = bootstrap_2(arr1, arr2)
-    return to_bootstrap_xarray(result, arr1)
+    return result
 
 def get_stats(arr: xr.DataArray):
     lower = arr.sel(stats="lower")

@@ -31,14 +31,13 @@ FIG_DIR.mkdir(exist_ok=True)
 # -----------------------------------------------------------------------------
 # Imports from project utilities
 # -----------------------------------------------------------------------------
-from functions.utils import (  # noqa: E402
-    DIR_PIC,
+from functions.utils import (
     load_area_ocean,
     fit_map_hac,
     plot_panel,
     STATS_COORD,
     make_cmap_norm,
-    load_pic_ohc_2d_layer,
+    load_2D_ohc,
 )
 
 # -----------------------------------------------------------------------------
@@ -50,7 +49,7 @@ plt.rcParams["figure.dpi"] = 300
 # -----------------------------------------------------------------------------
 # Parameters
 # -----------------------------------------------------------------------------
-ECHELLE = 1e9  # J m^-2 -> GJ m^-2
+ECHELLE = 1e12  #ZJ m^-2 -> GJ m^-2
 UNIT = "GJ m$^{-2}$ century$^{-1}$"
 CONF = 90
 
@@ -58,7 +57,7 @@ CONF = 90
 # -----------------------------------------------------------------------------
 # Load data
 # -----------------------------------------------------------------------------
-ohc_pic = load_pic_ohc_2d_layer("all", scale=ECHELLE)
+ohc_pic = load_2D_ohc("0_btm")/ECHELLE
 # first 1000 years and last 400 years
 ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
 ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
