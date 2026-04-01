@@ -36,6 +36,11 @@ N_BOOT = 1000
 QT_INF = 0.05
 QT_SUP = 0.95
 seed = 0
+CP =  3991.867 # J/(kg*K)
+RHO = 1026 # kg/m³ 
+AREA_TOT = 3.626975*10**14
+ECHELLE_AMOC = 1e6
+
 
 COLORS = {
     "orange_dark": "#d95f02",
@@ -49,18 +54,21 @@ COLORS = {
 }
 WHITE_FRAC = 0.01
 
+
 def load_area_ocean():
     """Load ocean grid-cell area from repository metadata."""
     ds = xr.open_dataset(AREACELLO_FILE)
     return ds["areacello"]
 
-def load_pic_ohc(scale):
-    """Load full piControl global OHC time series (scaled to ZJ)."""
+
+def load_pic_ohc_1D():
+    """Load full piControl global OHC time series."""
     ds = xr.open_dataset(OHC_PIC_FILE)
     varname = list(ds.data_vars)[0]
-    ohc = ds[varname] / scale
+    ohc = ds[varname].isel(lon=0).isel(lat=0)*CP*RHO*AREA_TOT
     return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
     
+
 def load_pic_ohc_2d_layer(layer, scale=1.0):
     """
     Load piControl 2D OHC field for a given vertical layer.
@@ -80,22 +88,24 @@ def load_pic_ohc_2d_layer(layer, scale=1.0):
     ohc = ds[varname] / scale
     return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
     
+
 def load_pic_amoc():
     """Load full piControl AMOC time series (Sv)."""
-    ds = xr.open_dataset(DIR_PIC / "amoc_picontrol.nc")
-    amoc = ds["amoc"]
+    ds = xr.open_dataset(PIC_GLOBAL_DIR / "amoc_pic_gb_3000y.nc")
+    amoc = ds.msftyz/(RHO*ECHELLE_AMOC)
     return amoc.assign_coords(year=np.arange(amoc.sizes["year"]))
 
-def load_integrated_ohc(dataset_type):
+
+def load_integrated_ohc(dataset_type,layer):
     if dataset_type == "hist_tot":
-        filepath = DIR_HIST_TOT / "ohc_2D_hist_tot.nc"
+        filepath = DIR_HIST_TOT 
     elif dataset_type == "hist_3000":
-        filepath = DIR_HIST_3000 / "ohc_2D_hist_3000.nc"
+        filepath = DIR_HIST_3000 
     elif dataset_type == "pic_tot":
-        filepath = DIR_PIC_TOT / "ohc_2D_pic_tot.nc"
+        filepath = DIR_PIC_TOT 
     elif dataset_type == "pic_3000":
-        filepath = DIR_PIC_3000 / "ohc_2D_pic_3000.nc"
-    ds = xr.open_dataset(filepath)
+        filepath = DIR_PIC_3000
+    ds = xr.open_mfdataset(filepath/f"*{layer}*.nc", dim = "ensemble")
     varname = list(ds.data_vars)[0]
     area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
     return (ds[varname] * area_oce).sum(dim=("x", "y"))
