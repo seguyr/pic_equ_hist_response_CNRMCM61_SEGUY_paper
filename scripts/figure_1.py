@@ -35,7 +35,7 @@ FIG_DIR.mkdir(exist_ok=True)
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    load_pic_ohc,
+    load_pic_ohc_1D,
     load_pic_amoc,
     load_integrated_ohc,
     load_branching_years,
@@ -67,13 +67,13 @@ def main():
     # Load data
     # -------------------------------------------------------------------------
 
-    ohc_pic = load_pic_ohc(scale=ECHELLE_OHC)
+    ohc_pic = load_pic_ohc_1D()/ECHELLE_OHC
     
     amoc_pic = load_pic_amoc()
 
-    ohc_hist_1000 = load_integrated_ohc("hist_tot")
+    ohc_hist_1000 = load_integrated_ohc("hist_tot", "0_btm")
 
-    ohc_hist_3000 = load_integrated_ohc("hist_3000")
+    ohc_hist_3000 = load_integrated_ohc("hist_3000", "0_btm")
 
     starty_tot, starty_3000 = load_branching_years()
 
