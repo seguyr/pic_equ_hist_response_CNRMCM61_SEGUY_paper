@@ -25,15 +25,11 @@ AREACELLO_FILE = METADATA_DIR / "areacello_Ofx_CNRM-CM6-1_piControl_r1i1p1f2_gn.
 AREACELLA_FILE = METADATA_DIR / "areacella_fx_CNRM-CM6-1_piControl_r1i1p1f2_gr.nc"
 MASK_FILE = METADATA_DIR / "gsubpolmsk.nc"
 
-DATA_ROOT = Path("/cnrm/ioga/Users/seguyr")
 
-DIR_HIST_TOT = DATA_ROOT / "hist_ens/hist_tot"
-DIR_HIST_3000 = DATA_ROOT / "hist_ens/hist_3000"
-
-DIR_PIC_TOT = DATA_ROOT / "pic_ens/pic_tot"
-DIR_PIC_3000 = DATA_ROOT / "pic_ens/pic_3000"
-
-DIR_PIC = DATA_ROOT / "pic_ens/pic"
+DIR_HIST_TOT = REPO_ROOT / "data" / "hist_tot"
+DIR_HIST_3000 = REPO_ROOT / "data" / "hist_3000"
+DIR_PIC_TOT = REPO_ROOT / "data" / "pic_tot"
+DIR_PIC_3000 = REPO_ROOT / "data" / "pic_3000"
 
 STATS_COORD = ["lower", "mean", "upper", "sigma", "p_value"]
 N_BOOT = 1000
@@ -60,7 +56,7 @@ def load_area_ocean():
 
 def load_pic_ohc(scale):
     """Load full piControl global OHC time series (scaled to ZJ)."""
-    ds = xr.open_dataset(DIR_PIC / "ohc_1D_picontrol.nc")
+    ds = xr.open_dataset(OHC_PIC_FILE)
     varname = list(ds.data_vars)[0]
     ohc = ds[varname] / scale
     return ohc.assign_coords(time=np.arange(ohc.sizes["time"]))
