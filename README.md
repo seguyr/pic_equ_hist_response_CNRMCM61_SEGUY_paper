@@ -67,14 +67,6 @@ All preprocessing scripts are located in: scripts/preprocess/
 To reproduce the processed datasets automatically, run: run_all.sh
 This script executes all preprocessing steps in the correct order and recreates the intermediate datasets in the specified output directory.
 
-It reproduces datasets corresponding to those partially available in:
-data/
-├── pic_tot
-├── hist_tot
-├── pic_3000
-├── hist_3000
-└── pic_global
-
 ---
 
 ## Intermediate Processing Functions
