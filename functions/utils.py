@@ -10,6 +10,10 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import re
+import dask
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -110,15 +114,12 @@ def load_integrated_ohc(dataset_type, layer):
         filepath = DIR_PIC_3000
     else:
         raise ValueError(f"Unknown dataset_type: {dataset_type}")
-
     files = sorted(Path(filepath).glob(f"*{layer}*.nc"), key=natural_key)
-
     ds = xr.open_mfdataset(
         files,
         combine="nested",
         concat_dim="ensemble"
     )
-
     area_oce = xr.open_dataset(AREACELLO_FILE)["areacello"]
     return (ds.__xarray_dataarray_variable__ * area_oce).sum(dim=("x", "y"))
 
@@ -168,6 +169,22 @@ def load_ohc_2d(dataset_type, layer="all"):
     ds = xr.open_dataset(filepath)
     return ds[list(ds.data_vars)[0]]
 
+def make_cmap_norm(vmin, vmax, white_frac=0.01, n=256):
+    white_width = white_frac * (vmax - vmin)
+
+    bounds = np.linspace(vmin, vmax, n)
+    colors = plt.cm.RdBu_r(np.linspace(0, 1, n))
+
+    i0_low = np.argmin(np.abs(bounds + white_width))
+    i0_high = np.argmin(np.abs(bounds - white_width))
+    colors[i0_low:i0_high] = [1, 1, 1, 1]
+
+    cmap = mcolors.ListedColormap(colors)
+    norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+    return cmap, norm
+
+
+
 def time_matching(hist: xr.DataArray, pic: xr.DataArray) -> xr.DataArray:
     pic = pic.assign_coords(time=hist["time"])
     return hist - pic
@@ -179,85 +196,81 @@ def anomalies(arr: xr.DataArray, ref_slice=slice(0, 50)) -> xr.DataArray:
 def gain(arr: xr.DataArray, gain_slice=slice(145, 165)) -> xr.DataArray:
     return arr.isel(time=gain_slice).mean(dim="time")
 
-def bootstrap(arr):
-    """
-    Bootstrap confidence intervals across the ensemble dimension.
-    
-    """
+def bootstrap(arr, n_boot=N_BOOT, seed=0):
     if np.all(np.isnan(arr)):
-        out_shape = tuple(arr.sizes[d] for d in arr.dims if d != "ensemble")
-        out_dims = tuple(d for d in arr.dims if d != "ensemble")
-        out_coords = {d: arr.coords[d] for d in out_dims}
-        out = xr.full_like(arr.isel(ensemble=0, drop=True), np.nan).expand_dims(stats=STATS_COORD)
-        return out.assign_coords(stats=STATS_COORD)
+        return np.array([np.nan, np.nan, np.nan, np.nan, np.nan], dtype=np.float32)
+
+    # Générateur pseudo-aléatoire
     rng = np.random.default_rng(seed)
+
     n_ens = arr.sizes["ensemble"]
     ens_values = arr.ensemble.values
+
+    print("sample")
     sampled_ens = rng.choice(
         ens_values,
-        size=(N_BOOT, n_ens),
-        replace=True,
-    )
+        size=(n_boot, n_ens),
+        replace=True
+    )  # (n_boot, n_ens)
+
     sampled_da = xr.DataArray(sampled_ens, dims=("boot", "ensemble"))
+
+    print("resample")
     resampled = arr.sel(ensemble=sampled_da)
+
+    print("mean")
     boot_means = resampled.mean(dim="ensemble")
     boot_means = boot_means.chunk(dict(boot=-1))
-    q_inf = boot_means.quantile(QT_INF, dim="boot").reset_coords("quantile", drop=True)
-    q_sup = boot_means.quantile(QT_SUP, dim="boot").reset_coords("quantile", drop=True)
-    mean = boot_means.mean(dim="boot")
+    
+    print("stats")
+    q_inf = boot_means.quantile(QT_INF, dim="boot")
+    q_sup = boot_means.quantile(QT_SUP, dim="boot")
+    mean  = boot_means.mean(dim="boot")
     sigma = boot_means.std(dim="boot")
-    p_left = (boot_means <= 0).mean(dim="boot")
+
+    p_left  = (boot_means <= 0).mean(dim="boot")
     p_right = (boot_means >= 0).mean(dim="boot")
     p_value = 2 * np.minimum(p_left, p_right)
-    return xr.concat(
-        [q_inf, mean, q_sup, sigma, p_value],
-        dim=xr.IndexVariable("stats", STATS_COORD),
-    )
 
-def bootstrap_2(arr1, arr2):
-    """
-    Bootstrap confidence intervals for the difference between two ensembles:
-    mean(arr2) - mean(arr1)
-    """
+    return np.array([q_inf, mean, q_sup, sigma, p_value], dtype=np.float32)
+
+
+def bootstrap_2(arr1, arr2, n_boot = N_BOOT, seed=0):
     if np.all(np.isnan(arr1)) or np.all(np.isnan(arr2)):
-        out = xr.full_like(arr1.isel(ensemble=0, drop=True), np.nan).expand_dims(stats=STATS_COORD)
-        return out.assign_coords(stats=STATS_COORD)
+        return np.array([np.nan, np.nan, np.nan, np.nan, np.nan], dtype=np.float32)
+
     rng = np.random.default_rng(seed)
+
     n_ens1 = arr1.sizes["ensemble"]
     ens_values1 = arr1.ensemble.values
+    
     n_ens2 = arr2.sizes["ensemble"]
     ens_values2 = arr2.ensemble.values
-    sampled_ens_1 = rng.choice(ens_values1, size=(N_BOOT, n_ens1), replace=True)
-    sampled_ens_2 = rng.choice(ens_values2, size=(N_BOOT, n_ens2), replace=True)
+    
+    sampled_ens_1 = rng.choice(ens_values1, size=(n_boot, n_ens1), replace=True)
+    sampled_ens_2 = rng.choice(ens_values2, size=(n_boot, n_ens2), replace=True)  # indépendant du 1
+
     sampled_da_1 = xr.DataArray(sampled_ens_1, dims=("boot", "ensemble"))
     sampled_da_2 = xr.DataArray(sampled_ens_2, dims=("boot", "ensemble"))
+
     resampled_1 = arr1.sel(ensemble=sampled_da_1)
     resampled_2 = arr2.sel(ensemble=sampled_da_2)
+
     boot_means = resampled_2.mean(dim="ensemble") - resampled_1.mean(dim="ensemble")
-    q_inf = boot_means.quantile(QT_INF, dim="boot").reset_coords("quantile", drop=True)
-    q_sup = boot_means.quantile(QT_SUP, dim="boot").reset_coords("quantile", drop=True)
-    mean = boot_means.mean(dim="boot")
+
+    q_inf = boot_means.quantile(QT_INF, dim="boot")
+    q_sup = boot_means.quantile(QT_SUP, dim="boot")
+    mean  = boot_means.mean(dim="boot")
     sigma = boot_means.std(dim="boot")
-    p_left = (boot_means <= 0).mean(dim="boot")
+
+    p_left  = (boot_means <= 0).mean(dim="boot")
     p_right = (boot_means >= 0).mean(dim="boot")
     p_value = 2 * np.minimum(p_left, p_right)
-    return xr.concat(
-        [q_inf, mean, q_sup, sigma, p_value],
-        dim=xr.IndexVariable("stats", STATS_COORD),
-    )
+
+    return np.array([q_inf, mean, q_sup, sigma, p_value], dtype=np.float32)
 
 
-def boot(arr: xr.DataArray):
-    """Run bootstrap and return a formatted xarray.DataArray."""
-    result = bootstrap(arr)
-    return result
-
-def boot_diff(arr1: xr.DataArray, arr2: xr.DataArray):
-    """Run bootstrap_2 and return a formatted xarray.DataArray."""
-    result = bootstrap_2(arr1, arr2)
-    return result
-
-def get_stats(arr: xr.DataArray):
+def get_stats(arr):
     lower = arr.sel(stats="lower")
     mean = arr.sel(stats="mean")
     upper = arr.sel(stats="upper")
@@ -336,18 +349,6 @@ def plot_panel(ax, ds, title, label, cmap, norm):
     remove_map_outline(ax)
     return cf
 
-def make_cmap_norm(vmin, vmax):
-    white_width = WHITE_FRAC * (vmax - vmin)
-    bounds = np.linspace(vmin, vmax, 256)
-    colors = plt.cm.RdBu_r(np.linspace(0, 1, 256))
-
-    i0_low = np.argmin(np.abs(bounds + white_width))
-    i0_high = np.argmin(np.abs(bounds - white_width))
-    colors[i0_low:i0_high] = [1, 1, 1, 1]
-
-    cmap = mcolors.ListedColormap(colors)
-    norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
-    return cmap, norm
 
 def rolling_trend_np(y, window=1000):
     y = np.asarray(y).astype(float)

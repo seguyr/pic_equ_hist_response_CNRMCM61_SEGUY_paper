@@ -29,7 +29,7 @@ sys.path.append(str(PROJECT_ROOT))
 # -----------------------------------------------------------------------------
 FIG_DIR = PROJECT_ROOT / "figures"
 FIG_DIR.mkdir(exist_ok=True)
-
+INTERMEDIATE_DIR = PROJECT_ROOT / "data/data_plot"
 # -----------------------------------------------------------------------------
 # Imports from project utilities
 # -----------------------------------------------------------------------------
@@ -38,8 +38,8 @@ from functions.utils import (
     time_matching,
     anomalies,
     gain,
-    boot,
-    boot_diff,
+    bootstrap,
+    bootstrap_2,
     plot_panel,
     COLORS
 )
@@ -69,32 +69,12 @@ colors[i0_low:i0_high] = [1, 1, 1, 1]
 CMAP_CUSTOM = mcolors.ListedColormap(colors)
 NORM = mcolors.TwoSlopeNorm(vmin=VMIN, vcenter=0, vmax=VMAX)
 
-# -----------------------------------------------------------------------------
-# Calcul
-# -----------------------------------------------------------------------------
 
-hist_1000 = load_2D_ohc("hist_tot", layer="0_btm") / ECHELLE_OHC
-hist_3000 = load_2D_ohc("hist_3000", layer="0_btm") / ECHELLE_OHC
-pic_1000 = load_2D_ohc("pic_tot", layer="0_btm") / ECHELLE_OHC
-pic_3000 = load_2D_ohc("pic_3000", layer="0_btm") / ECHELLE_OHC
+hist_gain_1000 = xr.open_dataset(INTERMEDIATE_DIR / "boot_1000_0_btm.nc").__xarray_dataarray_variable__
+hist_gain_3000 = xr.open_dataset(INTERMEDIATE_DIR / "boot_3000_0_btm.nc").__xarray_dataarray_variable__
+diff_hist_gain = xr.open_dataset(INTERMEDIATE_DIR / "boot_diff_0_btm.nc").__xarray_dataarray_variable__
 
-# Dedrift by time matching
-OHC_dd_1000 = time_matching(hist_1000, pic_1000)
-OHC_dd_3000 = time_matching(hist_3000, pic_3000)
-
-# Anomalies relative to first 50 years
-OHC_dd_1000 = anomalies(OHC_dd_1000)
-OHC_dd_3000 = anomalies(OHC_dd_3000)
-
-# Mean gain over final 20 years
-m_ohc_dd_1000 = gain(OHC_dd_1000)
-m_ohc_dd_3000 = gain(OHC_dd_3000)
-
-# Bootstrap
-hist_gain_1000 = boot(m_ohc_dd_1000)
-hist_gain_3000 = boot(m_ohc_dd_3000)
-diff_hist_gain = boot_diff(m_ohc_dd_1000, m_ohc_dd_3000)
-
+print(hist_gain_1000)
 # -----------------------------
 # FIGURE 
 # -----------------------------
@@ -124,4 +104,3 @@ cbar = fig.colorbar(
 cbar.set_label(f"OHC gain ({UNIT} m$^{-2}$)", fontsize=24, labelpad=20)
 cbar.ax.tick_params(labelsize=22, length=7, width=1.2)
 plt.savefig(FIG_DIR / "figure_6.pdf", bbox_inches="tight")
-
