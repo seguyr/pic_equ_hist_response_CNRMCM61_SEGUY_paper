@@ -176,7 +176,7 @@ axs[2].text(
 plt.tight_layout()
 
 plt.savefig(FIG_DIR / "figure_2.pdf", bbox_inches="tight")
-
+plt.savefig(FIG_DIR / "figure_2.png", bbox_inches="tight")
 
 
 

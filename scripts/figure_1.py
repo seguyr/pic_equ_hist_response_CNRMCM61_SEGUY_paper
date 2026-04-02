@@ -230,7 +230,7 @@ def main():
     ax1.legend(
         handles=legend_elements,
         loc="center",
-        bbox_to_anchor=(0.5, -0.2),
+        bbox_to_anchor=(0.5, -0.25),
         ncol=2,
         fontsize=20,
     )
@@ -241,7 +241,7 @@ def main():
 
     # Save figure
     plt.savefig(FIG_DIR / "figure_1.pdf", bbox_inches="tight")
-
+    plt.savefig(FIG_DIR / "figure_1.png", bbox_inches="tight")
 
 if __name__ == "__main__":
     main()

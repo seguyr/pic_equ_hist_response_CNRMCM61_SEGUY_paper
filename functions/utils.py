@@ -10,10 +10,13 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import re
-import dask
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-
+from matplotlib.patches import Patch
+#from statsmodels.nonparametric.smoothers_lowess import lowess as sm_lowess
+#from spectrum import aryule
+#import statsmodels.api as sm
+from scipy.stats import norm
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -301,6 +304,107 @@ def remove_map_outline(ax):
         ax.spines["geo"].set_visible(False)
     ax.patch.set_edgecolor("none")
     ax.patch.set_linewidth(0)
+    
+    
+    
+def LOWESS(y, span_width):
+    """
+    Apply Locally Weighted Scatterplot Smoothing (LOWESS) to a 1D time series.
+
+    Parameters
+    ----------
+    y : array-like
+        1D time series to be smoothed.
+    span_width : int
+        Window width for LOWESS smoothing (number of points). 
+        If greater than series length, full series is used.
+
+    Returns
+    -------
+    yfit : ndarray
+        LOWESS-smoothed time series.
+    """
+    x = np.arange(len(y))
+    total_num = len(x)
+    # Determine fraction of data used for smoothing
+    frac = min(span_width / total_num, 1.0)
+    # Apply LOWESS
+    yfit = sm_lowess(y, x, frac=frac, return_sorted=False)
+    return yfit
+
+
+def Monte_Carlo_AR1(y, residual, n_tot):
+    """
+    Generate Monte Carlo realizations of a time series using AR(1) noise.
+    Parameters
+    ----------
+    y : array-like
+        Fitted time series (e.g., LOWESS output)
+    residual : array-like
+        Residuals of the fitted time series (original - fitted)
+    n_tot : int
+        Number of Monte Carlo realizations to generate
+
+    Returns
+    -------
+    y_random : ndarray
+        Monte Carlo realizations, shape (n_tot, len(y))
+    """
+    n_time = len(y)
+    y_random = np.ma.ones((n_tot, n_time)) * np.nan
+    # Estimate AR(1) coefficient from valid residuals
+    valid_res = residual[residual > -1e30]  # filter out extreme invalid values
+    ar_coeffs, var_residual, _ = aryule(valid_res, 1)
+    AR1 = ar_coeffs[0]
+    # Generate each Monte Carlo realization
+    for n in range(n_tot):
+        noise = np.zeros(n_time)
+        noise[0] = np.random.normal(0, np.sqrt(var_residual))
+        y_random[n, 0] = y[0] + noise[0]
+        for i in range(1, n_time):
+            noise[i] = np.random.normal(0, np.sqrt(var_residual)) - AR1 * noise[i - 1]
+            y_random[n, i] = y[i] + noise[i]
+    return y_random
+
+
+
+
+def compute_ohc_change(y, n_tot, span_width):
+    # Apply LOWESS smoothing
+    y_lowess = LOWESS(y, span_width)
+    # Compute residuals
+    residual = y - y_lowess
+    # Generate Monte Carlo AR(1) realizations
+    y_random = Monte_Carlo_AR1(y, residual, n_tot)
+    # Apply LOWESS to each random realization
+    y_random_lowess = np.ones_like(y_random) * np.nan
+    for n in range(n_tot):
+        y_random_lowess[n, :] = LOWESS(y_random[n, :], span_width)
+    return (y_random_lowess[:, -1] - y_random_lowess[:, 0])
+
+
+
+def compute_ohc_gain(y, span_width):
+    # Apply LOWESS smoothing
+    y_lowess = LOWESS(y, span_width)
+    # Compute trend (end - start)
+    trend = y_lowess[-1] - y_lowess[0]
+    return trend
+
+def compute_err(k, obs, n_mc, span_width):
+    ts = obs.sst.sel(time=slice(12,74)).values[k]
+    if np.all(np.isnan(ts)):
+        return np.nan, np.nan
+    return compute_ohc_change(ts, n_mc, span_width)
+
+
+def compute_gain(k, obs, span_width):
+    ts = obs.sst.sel(time=slice(12,74)).values[k]
+    if np.all(np.isnan(ts)):
+        return np.nan, np.nan
+    return compute_ohc_gain(ts, span_width)
+
+
 
 def plot_panel(ax, ds, title, label, cmap, norm):
     """
@@ -333,7 +437,7 @@ def plot_panel(ax, ds, title, label, cmap, norm):
         zorder=2,
     )
     for coll in hatch.collections:
-        coll.set_edgecolor("lightgray")
+        coll.set_edgecolor("gray")
         coll.set_linewidth(0.0)
     ax.set_title(title, fontsize=16, pad=8, fontweight="bold")
     ax.text(
@@ -392,6 +496,180 @@ def plot_panel_2(ax, title, panel_label, low, mean, up, cmap, norm_cmap):
     remove_map_outline(ax)
     return m
 
+def plot_row(
+    ax_ts, ax_bar,
+    t_m, boot_1000, boot_3000,
+    t_o, obs_mean, obs_ic,
+    tas_gain, error_tot,
+    gain_tot, qinf_tot, qsup_tot,
+    gain_3000, qinf_3000, qsup_3000,
+    ylabel_ts="SST (°C)",
+    ylabel_bar="Trend over 1958–2014 (°C)",
+    label_obs = "ERA5c, AMIP-1-1-10, AMIP-ERSST5-1-0, AMIP-Had1p1-1-0",
+    legend_y=-0.18,
+):
+    # -------------------------
+    # panneau gauche : séries temporelles
+    # -------------------------
+    ax_ts.plot(
+        t_m,
+        boot_1000.sel(stats="mean").values,
+        color=COLORS["orange_dark"],
+        lw=2,
+        label="Hist_dd+1000"
+    )
+    ax_ts.fill_between(
+        t_m,
+        boot_1000.sel(stats="lower").values,
+        boot_1000.sel(stats="upper").values,
+        color=COLORS["orange_light"],
+        alpha=0.5
+    )
+
+    ax_ts.plot(
+        t_m,
+        boot_3000.sel(stats="mean").values,
+        color=COLORS["teal_dark"],
+        lw=2,
+        label="Hist_dd+3000"
+    )
+    ax_ts.fill_between(
+        t_m,
+        boot_3000.sel(stats="lower").values,
+        boot_3000.sel(stats="upper").values,
+        color=COLORS["teal_light"],
+        alpha=0.5
+    )
+
+    ax_ts.plot(
+        t_o,
+        obs_mean.values,
+        color=COLORS["red_dark"],
+        lw=2,
+        label=label_obs
+    )
+    ax_ts.fill_between(
+        t_o,
+        (obs_mean - obs_ic).values,
+        (obs_mean + obs_ic).values,
+        color=COLORS["red_light"],
+        alpha=0.6
+    )
+
+    ax_ts.grid(True, alpha=0.25)
+    ax_ts.tick_params(axis="both", which="major", labelsize=30)
+    ax_ts.set_ylabel(ylabel_ts, fontsize=40)
+    ax_ts.set_xlabel("Year", fontsize=30)
+
+    # -------------------------
+    # panneau droit : bar plot
+    # -------------------------
+    for sp in ["top", "left", "bottom"]:
+        ax_bar.spines[sp].set_visible(False)
+
+    ax_bar.spines["right"].set_visible(True)
+    ax_bar.spines["right"].set_linewidth(1.5)
+
+    ax_bar.set_xticks([])
+    ax_bar.set_xlabel("")
+
+    ax_bar.yaxis.set_ticks_position("right")
+    ax_bar.yaxis.set_label_position("right")
+    ax_bar.tick_params(axis="y", labelsize=30)
+    ax_bar.set_ylabel(ylabel_bar, fontsize=30)
+
+    ax_bar.grid(True, axis="y", alpha=0.25)
+
+    bar_labels = [
+        "Hist_dd+1000",
+        "Hist_dd+3000",
+        label_obs
+    ]
+    bar_colors = [
+        COLORS["orange_dark"],
+        COLORS["teal_dark"],
+        COLORS["red_dark"]
+    ]
+
+    values = np.array([
+        float(gain_tot.values),     # 1000
+        float(gain_3000.values),    # 3000
+        float(tas_gain)             # obs
+        ], dtype=float)
+
+    err_low = np.array([
+        float(gain_tot.values - qinf_tot.values),
+        float(gain_3000.values - qinf_3000.values),
+        float(error_tot)
+    ], dtype=float)
+
+    err_high = np.array([
+        float(qsup_tot.values - gain_tot.values),
+        float(qsup_3000.values - gain_3000.values),
+        float(error_tot)
+    ], dtype=float)
+
+    xpos = np.arange(len(values))
+    bar_w = 0.52
+    cap_size = 10
+    err_lw = 2.2
+    cap_thk = 2.2
+
+    ymins, ymaxs = [], []
+
+    for j, val in enumerate(values):
+        if np.isnan(val):
+            continue
+
+        ax_bar.bar(
+            xpos[j],
+            val,
+            width=bar_w,
+            color=bar_colors[j],
+            edgecolor="none",
+            alpha=0.60,
+            zorder=2
+        )
+
+        if np.isfinite(err_low[j]) and np.isfinite(err_high[j]):
+            ax_bar.errorbar(
+                xpos[j],
+                val,
+                yerr=[[err_low[j]], [err_high[j]]],
+                fmt="none",
+                ecolor=bar_colors[j],
+                elinewidth=err_lw,
+                capsize=cap_size,
+                capthick=cap_thk,
+                zorder=3
+            )
+            ymins.append(min(val - err_low[j], 0))
+            ymaxs.append(max(val + err_high[j], 0))
+        else:
+            ymins.append(min(val, 0))
+            ymaxs.append(max(val, 0))
+
+    if ymins:
+        ymin, ymax = min(ymins), max(ymaxs)
+        span = ymax - ymin if ymax > ymin else max(abs(ymax), 1.0)
+        ax_bar.set_ylim(ymin - 0.10 * span, ymax + 0.15 * span)
+
+    ax_bar.set_xlim(-0.7, len(values) - 1 + 0.7)
+    ax_bar.axhline(0, color="black", lw=1, alpha=0.5, zorder=1)
+
+    # légende propre à la ligne
+    handles = [
+        Patch(facecolor=bar_colors[k], edgecolor="none", label=bar_labels[k])
+        for k in range(len(bar_labels))
+    ]
+    ax_ts.legend(
+        handles=handles,
+        loc="upper center",
+        ncol=3,
+        frameon=False,
+        fontsize=35,
+        bbox_to_anchor=(0.8, legend_y)
+    )
 
 
 def rolling_trend_np(y, window=1000):

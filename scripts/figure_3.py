@@ -73,7 +73,7 @@ stats_400 = hac_to_stats_da(
 # -----------------------------------------------------------------------------
 # Colormap
 # -----------------------------------------------------------------------------
-VMIN, VMAX = -5, 5
+VMIN, VMAX = -3, 3
 CMAP_CUSTOM, NORM = make_cmap_norm(VMIN, VMAX)
 
 # -----------------------------------------------------------------------------
@@ -115,3 +115,4 @@ cbar.ax.tick_params(labelsize=20, length=7, width=1.2)
 
 #plt.tight_layout()
 plt.savefig(FIG_DIR / "figure_3.pdf", bbox_inches="tight")
+plt.savefig(FIG_DIR / "figure_3.png", bbox_inches="tight")

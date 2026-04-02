@@ -87,7 +87,7 @@ for LAYER in "${LAYERS[@]}"; do
     member_files=()
 
     # Step 1: merge time for each member
-    for MEMBER in $(seq 2 5); do
+    for MEMBER in $(seq 2 30); do
 
         IN_DIR="/cnrm/ioga/Users/seguy/hist_ens/hist_${MEMBER}/tmp"
         MEMBER_OUT="${TMP_OUT_DIR}/${PREFIX_IN}_r${MEMBER}.nc"

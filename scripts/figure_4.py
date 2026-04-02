@@ -156,4 +156,4 @@ for i, layer in enumerate(layers):
     )
 
 plt.savefig(FIG_DIR / "figure_4.pdf", bbox_inches="tight")
-
+plt.savefig(FIG_DIR / "figure_4.png", bbox_inches="tight")
