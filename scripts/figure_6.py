@@ -74,7 +74,7 @@ hist_gain_1000 = xr.open_dataset(INTERMEDIATE_DIR / "boot_1000_0_btm.nc").__xarr
 hist_gain_3000 = xr.open_dataset(INTERMEDIATE_DIR / "boot_3000_0_btm.nc").__xarray_dataarray_variable__
 diff_hist_gain = xr.open_dataset(INTERMEDIATE_DIR / "boot_diff_0_btm.nc").__xarray_dataarray_variable__
 
-print(hist_gain_1000)
+
 # -----------------------------
 # FIGURE 
 # -----------------------------

@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
+import xarray as xr
 
 # -----------------------------------------------------------------------------
 # Make the project root importable
@@ -26,14 +27,13 @@ sys.path.append(str(PROJECT_ROOT))
 # -----------------------------------------------------------------------------
 FIG_DIR = PROJECT_ROOT / "figures"
 FIG_DIR.mkdir(exist_ok=True)
-
+INTERMEDIATE_DIR = PROJECT_ROOT / "data/data_plot"
 # -----------------------------------------------------------------------------
 # Imports from project utilities
 # -----------------------------------------------------------------------------
 from functions.utils import (
-    load_pic_ohc_2d_layer,
     fit_map_hac,
-    plot_panel,
+    plot_panel_2,
     hac_to_stats_da,
     make_cmap_norm,
 )
@@ -64,32 +64,12 @@ row_limits = {
 }
 
 
-# -----------------------------------------------------------------------------
-# Calcul des stats par couche
-# -----------------------------------------------------------------------------
-results = {}
-
-for layer in layers:
-    ohc_pic =  load_pic_ohc_2d_layer(layer, scale=ECHELLE)
-    ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
-    ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
-
-    fit_map_1000 = fit_map_hac(ohc_1000, conf=CONF)
-    fit_map_400 = fit_map_hac(ohc_400, conf=CONF)
-
-    results[layer] = {
-        "slope_1000": fit_map_1000["slope"] * 100,
-        "ci_low_1000": fit_map_1000["ci_low"] * 100,
-        "ci_high_1000": fit_map_1000["ci_high"] * 100,
-        "slope_400": fit_map_400["slope"] * 100,
-        "ci_low_400": fit_map_400["ci_low"] * 100,
-        "ci_high_400": fit_map_400["ci_high"] * 100,
-    }
+results = xr.open_dataset(INTERMEDIATE_DIR / "results_boot_pic_global.nc")
 
 
-# -----------------------------------------------------------------------------
-# Figure
-# -----------------------------------------------------------------------------
+# -----------------------------
+# FIGURE
+# -----------------------------
 proj = ccrs.Robinson(central_longitude=0)
 
 fig = plt.figure(figsize=(16, 15))
@@ -114,35 +94,21 @@ for i, layer in enumerate(layers):
 
     lab_left = f"{chr(97 + 2*i)})"
     lab_right = f"{chr(97 + 2*i + 1)})"
-    
-    ds_1000 = hac_to_stats_da(
-        results[layer]["ci_low_1000"],
-        results[layer]["slope_1000"],
-        results[layer]["ci_high_1000"],
+
+    mL = plot_panel_2(
+        axL, col_titles[0], lab_left,
+        results["ci_low_1000"].sel(layer=layer),
+        results["slope_1000"].sel(layer=layer),
+        results["ci_high_1000"].sel(layer=layer),
+        cmap_row, norm_row
     )
 
-    ds_400 = hac_to_stats_da(
-        results[layer]["ci_low_400"],
-        results[layer]["slope_400"],
-        results[layer]["ci_high_400"],
-    )
-
-    mL = plot_panel(
-        axL,
-        ds_1000,
-        col_titles[0],
-        lab_left,
-        cmap_row,
-        norm_row,
-    )
-
-    mR = plot_panel(
-        axR,
-        ds_400,
-        col_titles[1],
-        lab_right,
-        cmap_row,
-        norm_row,
+    mR = plot_panel_2(
+        axR, col_titles[1], lab_right,
+        results["ci_low_400"].sel(layer=layer),
+        results["slope_400"].sel(layer=layer),
+        results["ci_high_400"].sel(layer=layer),
+        cmap_row, norm_row
     )
 
     cbar = fig.colorbar(
@@ -155,9 +121,9 @@ for i, layer in enumerate(layers):
     cbar.ax.tick_params(labelsize=16, length=6, width=1.1)
 
 
-# -----------------------------------------------------------------------------
-# Titres de colonnes
-# -----------------------------------------------------------------------------
+# -----------------------------
+# TITRES DE COLONNES
+# -----------------------------
 p0L = axes_grid[0][0].get_position()
 p0R = axes_grid[0][1].get_position()
 
@@ -171,9 +137,9 @@ fig.text(x_col2, y_col_titles, col_titles[1],
          ha="center", va="bottom", fontsize=20, fontweight="bold")
 
 
-# -----------------------------------------------------------------------------
-# Labels verticaux des couches
-# -----------------------------------------------------------------------------
+# -----------------------------
+# LABELS VERTICAUX DES COUCHES
+# -----------------------------
 for i, layer in enumerate(layers):
     pL = axes_grid[i][0].get_position()
     pR = axes_grid[i][1].get_position()
@@ -188,8 +154,6 @@ for i, layer in enumerate(layers):
         ha="center", va="center",
         fontsize=20, fontweight="bold"
     )
-
-plt.tight_layout()
 
 plt.savefig(FIG_DIR / "figure_4.pdf", bbox_inches="tight")
 

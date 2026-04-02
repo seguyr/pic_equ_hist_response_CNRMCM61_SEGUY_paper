@@ -27,7 +27,7 @@ sys.path.append(str(PROJECT_ROOT))
 # -----------------------------------------------------------------------------
 FIG_DIR = PROJECT_ROOT / "figures"
 FIG_DIR.mkdir(exist_ok=True)
-
+INTERMEDIATE_DIR = PROJECT_ROOT / "data/data_plot"
 # -----------------------------------------------------------------------------
 # Imports from project utilities
 # -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ from functions.utils import (
     plot_panel,
     STATS_COORD,
     make_cmap_norm,
-    load_2D_ohc,
+    hac_to_stats_da,
 )
 
 # -----------------------------------------------------------------------------
@@ -54,19 +54,9 @@ UNIT = "GJ m$^{-2}$ century$^{-1}$"
 CONF = 90
 
 
-# -----------------------------------------------------------------------------
-# Load data
-# -----------------------------------------------------------------------------
-ohc_pic = load_2D_ohc("0_btm")/ECHELLE
-# first 1000 years and last 400 years
-ohc_1000 = ohc_pic.isel(time=slice(0, 1000))
-ohc_400 = ohc_pic.isel(time=slice(2600, 3000))
+fit_map_1000 = xr.open_dataset(INTERMEDIATE_DIR / "fit_map_1000.nc")
+fit_map_400 = xr.open_dataset(INTERMEDIATE_DIR / "fit_map_400.nc")
 
-# -----------------------------------------------------------------------------
-# HAC fits
-# -----------------------------------------------------------------------------
-fit_map_1000 = fit_map_hac(ohc_1000, conf=CONF)
-fit_map_400 = fit_map_hac(ohc_400, conf=CONF)
 
 stats_1000 = hac_to_stats_da(
     fit_map_1000["ci_low"] * 100,
@@ -83,6 +73,7 @@ stats_400 = hac_to_stats_da(
 # -----------------------------------------------------------------------------
 # Colormap
 # -----------------------------------------------------------------------------
+VMIN, VMAX = -5, 5
 CMAP_CUSTOM, NORM = make_cmap_norm(VMIN, VMAX)
 
 # -----------------------------------------------------------------------------
@@ -122,5 +113,5 @@ cbar.ax.xaxis.set_ticks_position("bottom")
 cbar.set_label(f"OHC trend ({UNIT})", fontsize=20, labelpad=20)
 cbar.ax.tick_params(labelsize=20, length=7, width=1.2)
 
-plt.tight_layout()
+#plt.tight_layout()
 plt.savefig(FIG_DIR / "figure_3.pdf", bbox_inches="tight")

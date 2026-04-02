@@ -48,14 +48,14 @@ ECHELLE_AMOC = 1e6
 
 
 COLORS = {
-    "orange_dark": "#d95f02",
-    "orange_light": "#fdd0a2",
-    "teal_dark": "#1b9e77",
-    "teal_light": "#a6dba0",
+    "orange_dark": "#e07b00",
+    "orange_light": "#fdd87a",
+    "teal_dark": "#005f73",
+    "teal_light": "#9ae3d2",
     "red_dark": "#b2182b",
-    "red_light": "#f4a6b3",
-    "blue_dark": "#2166ac",
-    "blue_light": "#92c5de",
+    "red_light": "#f4a582",
+    "blue_dark": "#1b365d",
+    "blue_light": "#a3bce2",
 }
 WHITE_FRAC = 0.01
 
@@ -348,6 +348,50 @@ def plot_panel(ax, ds, title, label, cmap, norm):
     )
     remove_map_outline(ax)
     return cf
+
+def plot_panel_2(ax, title, panel_label, low, mean, up, cmap, norm_cmap):
+    ax.set_global()
+    area_oce = load_area_ocean()
+    lon2d, lat2d = nemo_lon_lat(area_oce)
+    ax.coastlines(linewidth=0.55)
+    ax.add_feature(cfeature.BORDERS, linewidth=0.35, linestyle=':')
+
+    m = ax.pcolormesh(
+        lon2d, lat2d, mean,
+        cmap=cmap, norm=norm_cmap,
+        transform=ccrs.PlateCarree()
+    )
+
+    mask_non_sig = np.ma.masked_where((low >= 0) | (up <= 0), mean)
+    hatch = ax.contourf(
+        lon2d, lat2d, mask_non_sig,
+        hatches=['///'],
+        colors='none',
+        transform=ccrs.PlateCarree(),
+        zorder=2
+    )
+
+    
+    # Style des hachures, compatible selon versions
+    if hasattr(hatch, "collections"):
+        for coll in hatch.collections:
+            coll.set_edgecolor("gray")
+            coll.set_linewidth(0.0)
+    else:
+        hatch.set_edgecolor("gray")
+        hatch.set_linewidth(0.0)
+
+    #ax.set_title(title, fontsize=18, pad=8, fontweight="bold")
+    ax.text(
+        0.02, 0.96, panel_label,
+        transform=ax.transAxes,
+        ha='left', va='top',
+        fontsize=18, fontweight='bold'
+    )
+
+    remove_map_outline(ax)
+    return m
+
 
 
 def rolling_trend_np(y, window=1000):
