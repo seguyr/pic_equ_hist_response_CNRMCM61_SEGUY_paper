@@ -500,12 +500,12 @@ def plot_row(
     ax_ts, ax_bar,
     t_m, boot_1000, boot_3000,
     t_o, obs_mean, obs_ic,
-    tas_gain, error_tot,
-    gain_tot, qinf_tot, qsup_tot,
+    tas_gain, error_tot, REF_START, REF_END,
+    gain_tot, qinf_tot, qsup_tot, P_START, P_END,
     gain_3000, qinf_3000, qsup_3000,
     ylabel_ts="SST (°C)",
-    ylabel_bar="Trend over 1958–2014 (°C)",
-    label_obs = "ERA5c, AMIP-1-1-10, AMIP-ERSST5-1-0, AMIP-Had1p1-1-0",
+    ylabel_bar="Response over 1958–2014 (°C)",
+    label_obs = "SST Reference products",
     legend_y=-0.18,
 ):
     # -------------------------
@@ -516,7 +516,7 @@ def plot_row(
         boot_1000.sel(stats="mean").values,
         color=COLORS["orange_dark"],
         lw=2,
-        label="Hist_dd+1000"
+        label="Hist+1000"
     )
     ax_ts.fill_between(
         t_m,
@@ -531,7 +531,7 @@ def plot_row(
         boot_3000.sel(stats="mean").values,
         color=COLORS["teal_dark"],
         lw=2,
-        label="Hist_dd+3000"
+        label="Hist+3000"
     )
     ax_ts.fill_between(
         t_m,
@@ -560,7 +560,8 @@ def plot_row(
     ax_ts.tick_params(axis="both", which="major", labelsize=30)
     ax_ts.set_ylabel(ylabel_ts, fontsize=40)
     ax_ts.set_xlabel("Year", fontsize=30)
-
+    #ax_ts.axvspan(REF_START, REF_END, color='grey', alpha=0.2)
+    #ax_ts.axvspan(P_START, P_END, color='grey', alpha=0.2)
     # -------------------------
     # panneau droit : bar plot
     # -------------------------
@@ -581,8 +582,8 @@ def plot_row(
     ax_bar.grid(True, axis="y", alpha=0.25)
 
     bar_labels = [
-        "Hist_dd+1000",
-        "Hist_dd+3000",
+        "Hist+1000",
+        "Hist+3000",
         label_obs
     ]
     bar_colors = [

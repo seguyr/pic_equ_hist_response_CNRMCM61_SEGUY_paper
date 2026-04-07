@@ -151,7 +151,7 @@ ax.set_frame_on(False)
 # Colorbar
 cbar = plt.colorbar(pcm, ax=ax, fraction=0.05, pad=0.03)
 cbar.set_label(
-    "OHC gain diff mask (GJ m$^{-2}$)",
+    "OHC response diff mask (GJ m$^{-2}$)",
     rotation=270,
     labelpad=15,
     fontsize=10
@@ -196,8 +196,8 @@ plt.text(min(x_3000)+2, min(y_3000.values),
          f'r = {r_value_3000:.2f}, p = {p_value_3000:.2e}',
          fontsize=15, color='blue', fontweight='bold', verticalalignment='top')
 
-plt.xlabel('AMOC historical dedrifted change (Sv)', fontsize=20)
-plt.ylabel('OHC historical dedrifted gains (ZJ)', fontsize=20)
+plt.xlabel('AMOC historical dedrifted response (Sv)', fontsize=20)
+plt.ylabel('OHC historical dedrifted response (ZJ)', fontsize=20)
 plt.legend()
 plt.grid()
 

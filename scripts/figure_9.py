@@ -32,6 +32,10 @@ from functions.utils import (
     plot_row
 )
 
+P_START = 1989
+P_END = 2014
+REF_START = 1958
+REF_END = 1983
 
 t_m = np.linspace(1850,2014,165)
 t_o =  np.linspace(1940,2014,75)
@@ -111,15 +115,19 @@ plot_row(
     obs_ic=obs_ic,
     tas_gain=tas_gain,
     error_tot=error_tot,
+    REF_START = REF_START,
+    REF_END = REF_END,
     gain_tot=gain_tot,
     qinf_tot=qinf_tot,
     qsup_tot=qsup_tot,
+    P_START = P_START,
+    P_END = P_END,
     gain_3000=gain_3000,
     qinf_3000=qinf_3000,
     qsup_3000=qsup_3000,
     ylabel_ts="Sea Surface Temperature (°C)",
-    ylabel_bar="Change over 1958–2014 (°C)",
-    label_obs = "ERA5c, AMIP-1-1-10, AMIP-ERSST5-1-0, AMIP-Had1p1-1-0",
+    ylabel_bar="Response over 1958–2014 (°C)",
+    label_obs = "SST Reference products",
     legend_y=-0.1
 )
 
@@ -138,15 +146,19 @@ plot_row(
     obs_ic=obs_ic_2,
     tas_gain=tas_gain_2,
     error_tot=error_tot_2,
+    REF_START = REF_START,
+    REF_END = REF_END,
     gain_tot=gain_tot_2,
     qinf_tot=qinf_tot_2,
     qsup_tot=qsup_tot_2,
+    P_START = P_START,
+    P_END = P_END,
     gain_3000=gain_3000_2,
     qinf_3000=qinf_3000_2,
     qsup_3000=qsup_3000_2,
     ylabel_ts="Land 2-m Temperature (°C)",
-    ylabel_bar="Change over 1958–2014 (°C)",
-    label_obs = "ERA5c, BEST, CRU-TS4.03",
+    ylabel_bar="Response over 1958–2014 (°C)",
+    label_obs = "SAT Reference products",
     legend_y=-0.1
 )
 

@@ -37,13 +37,17 @@ ds_bar = xr.open_dataset(INTERMEDIATE_DIR / "barplot_values_yerr.nc")
 yerr   = ds_bar["yerr"].values
 values = ds_bar["values"].values
 
+P_START = 1989
+P_END = 2014
+REF_START = 1958
+REF_END = 1983
 
 t_m = np.linspace(1850,2014,165)
 t_o = ds["time_obs"].values
 layers = ds["layer"].values
 
 layer_labels = ["0–300 m", "300–2000 m", "2000–bottom"]
-bar_labels = ["Hist_dd+1000", "Hist_dd+3000", "ISHII, NOAA, IAP"]
+bar_labels = ["Hist_dd+1000", "Hist_dd+3000", "OHC Reference products"]
 
 n_layers = len(layer_labels)
 n_bars   = len(bar_labels)
@@ -74,7 +78,7 @@ axes_bar = [fig.add_subplot(gs[i, 1]) for i in range(n_layers)]
 # TITRES DE COLONNES
 # ============================================================
 axes_ts[0].set_title("OHC (ZJ)", fontsize=20, fontweight="bold", pad=18)
-axes_bar[0].set_title("OHC Gain over 1958–2014 (ZJ)", fontsize=20, fontweight="bold", pad=18)
+axes_bar[0].set_title("OHC response over 1958–2014 (ZJ)", fontsize=20, fontweight="bold", pad=18)
 
 cap_size = 10
 err_lw   = 2.2
@@ -115,7 +119,7 @@ for i in range(n_layers):
     om = ds["obs_mean"].sel(layer=layer)
     oi = ds["obs_ic"].sel(layer=layer)
     if np.isfinite(om.values).any():
-        ax.plot(t_o, om.values, color=COLORS["red_dark"], lw=2, label="ISHII + NOAA + IAP")
+        ax.plot(t_o, om.values, color=COLORS["red_dark"], lw=2, label="OHC Reference products")
         ax.fill_between(
             t_o, (om - oi).values, (om + oi).values,
             color=COLORS["red_light"], alpha=0.6
@@ -141,7 +145,9 @@ for i in range(n_layers):
         fontweight="bold",
         clip_on=False
     )
-
+    #ax.axvspan(REF_START, REF_END, color='grey', alpha=0.2)
+    #ax.axvspan(P_START, P_END, color='grey', alpha=0.2)
+    
     # =========================
     # (B) BARRES + ERROR BARS
     # =========================

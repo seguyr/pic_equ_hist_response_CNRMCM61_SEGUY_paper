@@ -196,7 +196,7 @@ for i, layer in enumerate(layers):
         extend="both",
         extendfrac="auto",
     )
-    cbar.set_label(f"OHC gain ({UNIT} m$^{{-2}}$)", fontsize=18, labelpad=14)
+    cbar.set_label(f"OHC response ({UNIT} m$^{{-2}}$)", fontsize=18, labelpad=14)
     cbar.ax.tick_params(labelsize=16, length=6, width=1.0)
 
 # -----------------------------------------------------------------------------
@@ -223,4 +223,3 @@ for i, layer in enumerate(layers):
 # -----------------------------------------------------------------------------
 plt.savefig(FIG_DIR / "figure_7.pdf", bbox_inches="tight")
 plt.savefig(FIG_DIR / "figure_7.png", bbox_inches="tight")
-plt.show()

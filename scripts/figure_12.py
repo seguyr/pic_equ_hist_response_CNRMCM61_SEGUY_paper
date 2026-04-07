@@ -56,7 +56,7 @@ ax.fill_between(time, diff_hist_cor_tot_TM.sel(stats='lower').values, diff_hist_
 ax.hlines(m_diff_hist_cor_tot_TM.sel(stats='mean').values, 1995, 2014, colors='purple',  linewidth=3)
 ax.errorbar(x=2005, y=m_diff_hist_cor_tot_TM.sel(stats='mean').values, 
              yerr=[[m_diff_hist_cor_tot_TM.sel(stats='mean').values  - m_diff_hist_cor_tot_TM.sel(stats='lower').values ], [m_diff_hist_cor_tot_TM.sel(stats='upper').values  - m_diff_hist_cor_tot_TM.sel(stats='mean').values]], 
-             fmt='o', color='purple', capsize=5, label=f"IC {IC} [1995-2014] = {(m_diff_hist_cor_tot_TM.sel(stats='upper').values - m_diff_hist_cor_tot_TM.sel(stats='lower').values):.2f} ZJ")
+             fmt='o',linewidth = 7, color='purple', capsize=15, label=f"IC {IC} [1995-2014] = {(m_diff_hist_cor_tot_TM.sel(stats='upper').values - m_diff_hist_cor_tot_TM.sel(stats='lower').values):.2f} ZJ")
 
 
 ax.plot(time, diff_hist_cor_tot.sel(stats='mean').values, color="red", label='Linear Regression dedrift with 29 members')
@@ -65,7 +65,7 @@ ax.fill_between(time, diff_hist_cor_tot.sel(stats='lower').values, diff_hist_cor
 ax.hlines(m_diff_hist_cor_tot.sel(stats='mean').values, 1995, 2014, colors='red', linewidth=3)
 ax.errorbar(x=2005, y=m_diff_hist_cor_tot.sel(stats='mean').values, 
              yerr=[[m_diff_hist_cor_tot.sel(stats='mean').values  - m_diff_hist_cor_tot.sel(stats='lower').values ], [m_diff_hist_cor_tot.sel(stats='upper').values  - m_diff_hist_cor_tot.sel(stats='mean').values]], 
-             fmt='o', color='red', capsize=5, label=f"IC {IC} [1995-2014] = {(m_diff_hist_cor_tot.sel(stats='upper').values - m_diff_hist_cor_tot.sel(stats='lower').values):.2f} ZJ")
+             fmt='o', linewidth = 5, color='red', capsize=15, label=f"IC {IC} [1995-2014] = {(m_diff_hist_cor_tot.sel(stats='upper').values - m_diff_hist_cor_tot.sel(stats='lower').values):.2f} ZJ")
 
 ax.plot(time, diff_hist_cor_1000_3.sel(stats='mean').values, color="yellow", label='Linear Regression dedrift with 10 members')
 ax.fill_between(time, diff_hist_cor_1000_3.sel(stats='lower').values, diff_hist_cor_1000_3.sel(stats='upper').values, color="yellow", alpha=0.6)
@@ -73,7 +73,7 @@ ax.fill_between(time, diff_hist_cor_1000_3.sel(stats='lower').values, diff_hist_
 ax.hlines(m_diff_hist_cor_1000_3.sel(stats='mean').values, 1995, 2014, colors='yellow', linewidth=3)
 ax.errorbar(x=2005, y=m_diff_hist_cor_1000_3.sel(stats='mean').values, 
              yerr=[[m_diff_hist_cor_1000_3.sel(stats='mean').values  - m_diff_hist_cor_1000_3.sel(stats='lower').values ], [m_diff_hist_cor_1000_3.sel(stats='upper').values  - m_diff_hist_cor_1000_3.sel(stats='mean').values]], 
-             fmt='o', color='yellow', capsize=5,  label=f"IC {IC} [1995-2014] = {(m_diff_hist_cor_1000_3.sel(stats='upper').values - m_diff_hist_cor_1000_3.sel(stats='lower').values):.2f} ZJ")
+             fmt='o', linewidth = 3, color='yellow', capsize=15,  label=f"IC {IC} [1995-2014] = {(m_diff_hist_cor_1000_3.sel(stats='upper').values - m_diff_hist_cor_1000_3.sel(stats='lower').values):.2f} ZJ")
 
 ax.axhline(0, color='green', linewidth=3)
 

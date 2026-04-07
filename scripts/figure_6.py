@@ -101,7 +101,7 @@ cbar = fig.colorbar(
     extendfrac='auto'
 )
 
-cbar.set_label(f"OHC gain ({UNIT} m$^{-2}$)", fontsize=24, labelpad=20)
+cbar.set_label(f"OHC response ({UNIT} m$^{-2}$)", fontsize=24, labelpad=20)
 cbar.ax.tick_params(labelsize=22, length=7, width=1.2)
 plt.savefig(FIG_DIR / "figure_6.pdf", bbox_inches="tight")
 plt.savefig(FIG_DIR / "figure_6.png", bbox_inches="tight")
