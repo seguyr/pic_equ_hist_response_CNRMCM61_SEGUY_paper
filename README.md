@@ -54,6 +54,7 @@ Additional datasets used in the study:
 
 - extended piControl simulations
 - reconstructed ensembles
+- CMIP6 OHC multi-model products
 
 are available upon request from the authors.
 
