@@ -1,5 +1,5 @@
 """
-Figure 11: boxplot ditrib AMOC VS OHC
+Figure 11: Influence of ensemble size 
 ====================================================
 
 """
@@ -21,125 +21,52 @@ sys.path.append(str(PROJECT_ROOT))
 # -----------------------------------------------------------------------------
 FIG_DIR = PROJECT_ROOT / "figures"
 FIG_DIR.mkdir(exist_ok=True)
-INTERMEDIATE_DIR = PROJECT_ROOT / "data/data_plot"
+INTERMEDIATE_DIR = PROJECT_ROOT / "data/data_plot/fig11"
+
+m_OHC_dd_boot_both = xr.open_mfdataset(INTERMEDIATE_DIR / "m_OHC_dd_boot_both.nc").__xarray_dataarray_variable__
 
 
-boot_amoc_1000 = xr.open_mfdataset(INTERMEDIATE_DIR / "boot_amoc_1000_boxplot.nc").__xarray_dataarray_variable__
-boot_amoc_3000 = xr.open_mfdataset(INTERMEDIATE_DIR / "boot_amoc_3000_boxplot.nc").__xarray_dataarray_variable__
-boot_ohc_1000 = xr.open_mfdataset(INTERMEDIATE_DIR / "boot_ohc_1000_boxplot.nc").__xarray_dataarray_variable__
-boot_ohc_3000 = xr.open_mfdataset(INTERMEDIATE_DIR / "boot_ohc_3000_boxplot.nc").__xarray_dataarray_variable__
+#Tracé
 
-ts_1000 = xr.open_mfdataset(INTERMEDIATE_DIR / "ts_1000_amoc_boxplot.nc").__xarray_dataarray_variable__
-ts_3000 = xr.open_mfdataset(INTERMEDIATE_DIR / "ts_3000_amoc_boxplot.nc").__xarray_dataarray_variable__
-ts_1000_ohc = xr.open_mfdataset(INTERMEDIATE_DIR / "ts_1000_ohc_boxplot.nc").__xarray_dataarray_variable__
-ts_3000_ohc = xr.open_mfdataset(INTERMEDIATE_DIR / "ts_3000_ohc_boxplot.nc").__xarray_dataarray_variable__
+# Axe croissant : 10 à 29 membres
+x = np.arange(4, 30, 2)
 
+# Les données sont stockées dans l'ordre 29 -> 10
+# donc on inverse leur ordre
+mean = m_OHC_dd_boot_both.sel(stats="mean").values[::-1]
+lower = m_OHC_dd_boot_both.sel(stats="lower").values[::-1]
+upper = m_OHC_dd_boot_both.sel(stats="upper").values[::-1]
 
-mean_1000 = boot_amoc_1000.sel(stats="mean").mean()
-low_1000  = boot_amoc_1000.sel(stats="lower").mean()
-up_1000   = boot_amoc_1000.sel(stats="upper").mean()
+# IC à 90 %
+ic_lower = lower
+ic_upper = upper
 
-mean_3000 = boot_amoc_3000.sel(stats="mean").mean()
-low_3000  = boot_amoc_3000.sel(stats="lower").mean()
-up_3000   = boot_amoc_3000.sel(stats="upper").mean()
+fig, ax = plt.subplots(figsize=(8, 5))
 
-mean_1000_ohc = boot_ohc_1000.sel(stats="mean").mean()
-low_1000_ohc  = boot_ohc_1000.sel(stats="lower").mean()
-up_1000_ohc   = boot_ohc_1000.sel(stats="upper").mean()
+# Moyenne
+ax.plot(x, mean, "-", color = 'red', linewidth=2, label="Mean")
 
-mean_3000_ohc = boot_ohc_3000.sel(stats="mean").mean()
-low_3000_ohc  = boot_ohc_3000.sel(stats="lower").mean()
-up_3000_ohc   = boot_ohc_3000.sel(stats="upper").mean()
-
-
-
-fig, axs = plt.subplots(1, 2, figsize=(10,6), sharey=False)
-
-# ======================
-# SUBPLOT 2 : AMOC
-# ======================
-ax = axs[1]
-
-ax.boxplot(
-    [ts_1000, ts_3000],
-    positions=[1,2],
-    widths=0.5,
-    whis=[5,95],
-    showfliers=False,
-    boxprops=dict(color="grey"),
-    medianprops=dict(color="grey"),
-    whiskerprops=dict(color="grey"),
-    capprops=dict(color="grey"),
+# IC 90 %
+ax.fill_between(
+    x,
+    ic_lower,
+    ic_upper,
+    color = "red",
+    alpha=0.3,
+    label="90% IC"
 )
 
-ax.errorbar(
-    1,
-    mean_1000,
-    yerr=[[mean_1000-low_1000],[up_1000-mean_1000]],
-    fmt='o',
-    color='orange',
-    capsize=5,
-    label="piC+1000 bootstrap IC90"
-)
+ax.set_xlabel("Number of members")
+ax.set_ylabel("OHC [hist_dd+3000 - hist_dd+1000] (in ZJ)")
+ax.set_xticks(x)
 
-ax.errorbar(
-    2,
-    mean_3000,
-    yerr=[[mean_3000-low_3000],[up_3000-mean_3000]],
-    fmt='o',
-    color='blue',
-    capsize=5,
-    label="piC+3000 bootstrap IC90"
-)
+ax.axhline(0, color='green', linewidth=3)
 
-ax.set_xticks([1,2])
-ax.set_xticklabels(["piC+1000","piC+3000"], fontsize = 15)
-ax.set_ylabel("AMOC (Sv)", fontsize = 15)
-ax.tick_params(axis='both', labelsize=15)
-ax.grid(alpha=0.3)
-
-# ======================
-# SUBPLOT 1 : OHC
-# ======================
-ax = axs[0]
-
-ax.boxplot(
-    [ts_1000_ohc, ts_3000_ohc],
-    positions=[1,2],
-    widths=0.5,
-    whis=[5,95],
-    showfliers=False,
-    boxprops=dict(color="black"),
-    medianprops=dict(color="black"),
-    whiskerprops=dict(color="black"),
-    capprops=dict(color="black"),
-)
-
-ax.errorbar(
-    1,
-    mean_1000_ohc,
-    yerr=[[mean_1000_ohc-low_1000_ohc],[up_1000_ohc-mean_1000_ohc]],
-    fmt='o',
-    color='orange',
-    capsize=5,
-)
-
-ax.errorbar(
-    2,
-    mean_3000_ohc,
-    yerr=[[mean_3000_ohc-low_3000_ohc],[up_3000_ohc-mean_3000_ohc]],
-    fmt='o',
-    color='blue',
-    capsize=5,
-)
-
-ax.set_xticks([1,2])
-ax.set_xticklabels(["piC+1000","piC+3000"], fontsize = 15)
-ax.set_ylabel("OHC (ZJ)", fontsize = 15)
-ax.tick_params(axis='both', labelsize=15)
-
+ax.legend(loc = "lower right")
 ax.grid(alpha=0.3)
 
 plt.tight_layout()
+
+
 plt.savefig(FIG_DIR / "figure_11.pdf", bbox_inches="tight")
 plt.savefig(FIG_DIR / "figure_11.png", bbox_inches="tight")
